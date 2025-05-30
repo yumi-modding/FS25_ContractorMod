@@ -63,8 +63,17 @@ function ContractorMod:initFromSave()
         local style = PlayerStyle.new()
         -- style:loadFromXMLFile(xml, key..".style")
         local worker = ContractorModWorker:new(name, i, style)
-        if pos then worker.x, worker.y, worker.z = string.getVector(pos) end
-        if rot then worker.rotX, worker.rotY = string.getVector(rot) end
+        if ContractorMod.debug then print(pos) end
+        local posVector = string.getVector(pos);
+        if ContractorMod.debug then print("posVector "..tostring(posVector)) end
+        local rotVector = string.getVector(rot);
+        worker.x = posVector[1]
+        worker.y = posVector[2]
+        worker.z = posVector[3]
+        worker.dx = rotVector[1]
+        worker.dy = rotVector[2]
+        worker.rotY = rotVector[2]
+        worker.dz = rotVector[3]
         local vehicleID = xml:getString(key.."#vehicleID");
         if vehicleID ~= "0" then
           if ContractorMod.mapVehicleLoad ~= nil then
@@ -171,9 +180,9 @@ function ContractorMod:onSaveCareerSavegame()
         local worker = self.workers[i]
         local key = string.format(rootXmlKey .. ".workers.worker(%d)", i - 1);
         xmlFile:setString(key.."#name", worker.name);
-        local pos = worker.x..' '..worker.y..' '..worker.z
+        local pos = Utils.getNoNil(worker.x, "0.")..' '..Utils.getNoNil(worker.y, "0.")..' '..Utils.getNoNil(worker.z, "0.")
         xmlFile:setString(key.."#position", pos);
-        local rot = worker.dx..' '..worker.dy..' '..worker.dz
+        local rot = Utils.getNoNil(worker.dx, "0.")..' '..Utils.getNoNil(worker.dy, "0.")..' '..Utils.getNoNil(worker.dz, "0.")
         xmlFile:setString(key.."#rotation", rot);
         local vehicleID = "0"
         if worker.currentVehicle ~= nil then
@@ -259,6 +268,14 @@ end
 -- Hook into game events as needed (e.g., onStartMission, onSaveGame)
 Mission00.onStartMission = Utils.appendedFunction(Mission00.onStartMission, function()
     ContractorMod:init()
+    DebugUtil.printTableRecursively(ContractorMod.workers, " ", 1, 2) 
+    local firstWorker = ContractorMod.workers[1]
+    if g_localPlayer and g_localPlayer ~= nil then
+      g_localPlayer:teleportTo(firstWorker.x, firstWorker.y, firstWorker.z)
+      if firstWorker.currentVehicle ~= nil then
+        g_localPlayer:setSpawnVehicle(firstWorker.currentVehicle)
+      end
+    end
 end)
 
 
