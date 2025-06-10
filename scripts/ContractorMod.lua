@@ -50,20 +50,30 @@ end
 
 function ContractorMod:initFromSave()
   if ContractorMod.debug then print("ContractorMod:initFromSave()") end
+    -- Copy ContractorMod.xml from zip to modSettings dir
+    ContractorMod:CopyContractorModXML()
     -- Minimal: load worker name, position, style from XML
-    local savePath = g_currentMission.missionInfo.savegameDirectory .. "/ContractorMod.xml"
-    if not fileExists(savePath) then return false end
-    local xml = XMLFile.load("ContractorMod", savePath)
-    local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
-    for i = 1, num do
-        local key = string.format("ContractorMod.workers.worker(%d)", i-1)
-        local name = xml:getString(key.."#name")
-        local pos = xml:getString(key.."#position")
-        local rot = xml:getString(key.."#rotation")
-        local style = PlayerStyle.new()
-        -- style:loadFromXMLFile(xml, key..".style")
-        local worker = ContractorModWorker:new(name, i, style)
-        if ContractorMod.debug then print(pos) end
+    if self.savegameFolderPath and self.ContractorModXmlFilePath then
+      createFolder(self.savegameFolderPath);
+      local xml;
+      if fileExists(self.ContractorModXmlFilePath) then
+        xml = XMLFile.load('ContractorMod', self.ContractorModXmlFilePath);
+      else
+        xml = XMLFile.create('ContractorMod', self.ContractorModXmlFilePath, 'ContractorMod');
+        xml:save()
+        xml:delete();
+        return false;
+      end;
+      local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
+      for i = 1, num do
+          local key = string.format("ContractorMod.workers.worker(%d)", i-1)
+          local name = xml:getString(key.."#name")
+          local pos = xml:getString(key.."#position")
+          local rot = xml:getString(key.."#rotation")
+          local style = PlayerStyle.new()
+          -- style:loadFromXMLFile(xml, key..".style")
+          local worker = ContractorModWorker:new(name, i, style)
+          if ContractorMod.debug then print(pos) end
         local posVector = string.getVector(pos);
         if ContractorMod.debug then print("posVector "..tostring(posVector)) end
         local rotVector = string.getVector(rot);
@@ -115,7 +125,34 @@ function ContractorMod:initFromSave()
     self.numWorkers = #self.workers
     xml:delete()
     return self.numWorkers > 0
+  end
 end
+
+-- @doc Copy default parameters from mod mod zip file to mods directory so end-user can edit it
+function ContractorMod:CopyContractorModXML()
+  if ContractorMod.debug then print("ContractorMod:CopyContractorModXML") end
+  if g_currentMission ~= nil and g_currentMission:getIsServer() then
+    if ContractorMod.myCurrentModDirectory then
+      local modSettingsDir = ContractorMod.myCurrentModDirectory .. "../../modSettings"
+      local xmlFilePath = modSettingsDir.."/ContractorMod.xml"
+      if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_1") end
+      local xmlFile;
+      if not fileExists(xmlFilePath) then
+        if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_2") end
+        local xmlSourceFilePath = ContractorMod.myCurrentModDirectory .. "ContractorMod.xml"
+        local xmlSourceFile;
+        if fileExists(xmlSourceFilePath) then
+          if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_3") end
+          xmlSourceFile = loadXMLFile('ContractorMod', xmlSourceFilePath);
+          createFolder(modSettingsDir)
+          saveXMLFileTo(xmlSourceFile, xmlFilePath);
+          if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_4") end
+        end
+      end;
+    end
+  end
+end
+
 
 -- @doc Will call dedicated save method
 SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.onSaveComplete, function(self)

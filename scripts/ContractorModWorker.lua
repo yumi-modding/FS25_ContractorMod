@@ -23,7 +23,7 @@ function ContractorModWorker:new(name, index, workerStyle)
 
   self.name = name
   self.currentVehicle = nil
-
+  self.playerStyle = workerStyle
 
   self.color = Farm.COLORS[index]
   if g_localPlayer ~= nil then
@@ -151,6 +151,7 @@ function ContractorModWorker:afterSwitch(noEventSend)
       -- setTranslation(g_currentMission.player.rootNode, self.x, self.y, self.z);
       -- g_currentMission.player:moveRootNodeToAbsolute(self.x, self.y-0.2, self.z);
       g_localPlayer:teleportTo(self.x, self.y, self.z)
+      -- g_localPlayer:setStyleAsync(self.playerStyle, false, nil, true)
       -- g_localPlayer:setRotation(self.rotX, self.rotY)
       -- self.player.isEntered = true
       -- self.player.isControlled = true
