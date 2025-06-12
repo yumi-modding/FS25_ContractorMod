@@ -343,6 +343,18 @@ function ContractorMod:onSwitchVehicle(action)
   end
 end
 
+-- @doc Switch directly to another worker
+function ContractorMod:activateWorker(actionName, keyStatus)
+	if ContractorMod.debug then print("ContractorMod:activateWorker") end
+  if ContractorMod.debug then print("actionName "..tostring(actionName)) end
+  if string.sub(actionName, 1, 20) == "ContractorMod_WORKER" then
+    local workerIndex = tonumber(string.sub(actionName, -1))
+    if self.numWorkers >= workerIndex and workerIndex ~= self.currentID then
+      self:setCurrentContractorModWorker(workerIndex)
+    end
+  end
+end
+
 -- @doc Change active worker
 function ContractorMod:setCurrentContractorModWorker(setID)
   if ContractorMod.debug then print("ContractorMod:setCurrentContractorModWorker(setID) " .. tostring(setID) .. " - " .. tostring(self.currentID)) end
@@ -393,4 +405,36 @@ function ContractorMod:draw()
   end
 end
 
-addModEventListener(ContractorMod);
+PlayerInputComponent.registerGlobalPlayerActionEvents = Utils.appendedFunction(PlayerInputComponent.registerGlobalPlayerActionEvents, function()
+    if ContractorMod.debug then print("ContractorMod:registerActionEvents()") end
+    for _,actionName in pairs({ "ContractorMod_WORKER1",
+                                "ContractorMod_WORKER2",
+                                "ContractorMod_WORKER3",
+                                "ContractorMod_WORKER4",
+                                "ContractorMod_WORKER5",
+                                "ContractorMod_WORKER6",
+                                "ContractorMod_WORKER7",
+                                "ContractorMod_WORKER8" }) do
+      -- print("actionName "..actionName)
+      local success, eventName, event, action = g_inputBinding:registerActionEvent(InputAction[actionName], ContractorMod, ContractorMod.activateWorker, false, true, false, true)
+      if success then
+        g_inputBinding:setActionEventTextPriority(eventName, GS_PRIO_NORMAL)
+        g_inputBinding:setActionEventTextVisibility(eventName, false)
+      end
+    end
+    
+    if ContractorMod.useDebugCommands then
+      print("ContractorMod:registerActionEvents() for DEBUG")
+      for _,actionName in pairs({ "ContractorMod_DEBUG_MOVE_PASS_LEFT",
+                                  "ContractorMod_DEBUG_MOVE_PASS_RIGHT",
+                                  "ContractorMod_DEBUG_MOVE_PASS_TOP",
+                                  "ContractorMod_DEBUG_MOVE_PASS_BOTTOM",
+                                  "ContractorMod_DEBUG_MOVE_PASS_FRONT",
+                                  "ContractorMod_DEBUG_MOVE_PASS_BACK",
+                                  "ContractorMod_DEBUG_DUMP_PASS" }) do
+        -- print("actionName "..actionName)
+        local __, eventName, event, action = InputBinding:registerActionEvent(InputAction[actionName], ContractorMod, ContractorMod.debugCommands ,false ,true ,false ,true)
+      end
+    end
+end)
+
