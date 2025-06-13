@@ -438,3 +438,4 @@ PlayerInputComponent.registerGlobalPlayerActionEvents = Utils.appendedFunction(P
     end
 end)
 
+addModEventListener(ContractorMod);
