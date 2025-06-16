@@ -1,7 +1,9 @@
+source(Utils.getFilename("scripts/cmAIHotspot.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmEnterable.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmFSBaseMission.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmInGameMenuMapFrame.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmMission00.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmPlayer.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmPlayerInputComponent.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmSavegameController.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmShopOthersFrame.lua", g_currentModDirectory))
@@ -26,6 +28,8 @@ function ContractorMod:init()
     ContractorMod.currentID = 1
     ContractorMod.numWorkers = 2
     ContractorMod.workers = {}
+    ContractorMod.shouldStopWorker = true
+    ContractorMod.switching = false 
     ContractorMod.displayPlayerNames = true
 
     self:registerXmlSchema()
