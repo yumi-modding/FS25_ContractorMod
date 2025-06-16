@@ -20,32 +20,45 @@ function ContractorMod:init()
     self.workers = {}
     ContractorMod.displayPlayerNames = true
 
-    local savegameDir;
+    self:registerXmlSchema()
+
+    local savegameDir
     if g_currentMission.missionInfo.savegameDirectory then
-      savegameDir = g_currentMission.missionInfo.savegameDirectory;
-    end;
+      savegameDir = g_currentMission.missionInfo.savegameDirectory
+    end
     if not savegameDir and g_careerScreen.currentSavegame and g_careerScreen.currentSavegame.savegameIndex then
-      savegameDir = ('%ssavegame%d'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
-    end;
+      savegameDir = ('%ssavegame%d'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex)
+    end
     if not savegameDir and g_currentMission.missionInfo.savegameIndex ~= nil then
-      savegameDir = ('%ssavegame%d'):format(getUserProfileAppPath(), g_careerScreen.missionInfo.savegameIndex);
-    end;
-    self.savegameFolderPath = savegameDir;
-    self.ContractorModXmlFilePath = self.savegameFolderPath .. '/ContractorMod.xml';
+      savegameDir = ('%ssavegame%d'):format(getUserProfileAppPath(), g_careerScreen.missionInfo.savegameIndex)
+    end
+    self.savegameFolderPath = savegameDir
+    self.ContractorModXmlFilePath = self.savegameFolderPath .. '/ContractorMod.xml'
 
     -- Try to load from savegame, else create default workers
     if not self:initFromSave() then
-        table.insert(self.workers, ContractorModWorker:new("Alex", 1, g_helperManager:getRandomHelperStyle()))
-        table.insert(self.workers, ContractorModWorker:new("Brenda", 2, g_helperManager:getRandomHelperStyle()))
+        table.insert(self.workers, ContractorModWorker:new("Alex", 1, g_localPlayer.graphicsComponent:getStyle()))
+        local brendaStyle = g_helperManager:getRandomHelperStyle()
+        while brendaStyle:getIsMale() do
+            brendaStyle = g_helperManager:getRandomHelperStyle()
+        end
+        table.insert(self.workers, ContractorModWorker:new("Brenda", 2, brendaStyle))
         table.insert(self.workers, ContractorModWorker:new("Chris", 3, g_helperManager:getRandomHelperStyle()))
-        table.insert(self.workers, ContractorModWorker:new("David", 4, g_helperManager:getRandomHelperStyle()))
+        local davidStyle = g_helperManager:getRandomHelperStyle()
+        while davidStyle:getIsMale() == false do
+            davidStyle = g_helperManager:getRandomHelperStyle()
+        end
+        table.insert(self.workers, ContractorModWorker:new("David", 4, davidStyle))
         self.numWorkers = #self.workers
-        self.displaySettings = {}
-        self.displaySettings.characterName = {}
-        self.displaySettings.characterName.x = 0.9828
-        self.displaySettings.characterName.y = 0.90
-        self.displaySettings.characterName.size = 0.024
+        self.displaySettings = {
+            characterName = {
+                x = 0.9828,
+                y = 0.90,
+                size = 0.024
+            }
+        }
     end
+    g_currentMission.nickname = self.workers[self.currentID].name
 end
 
 function ContractorMod:initFromSave()
@@ -54,16 +67,16 @@ function ContractorMod:initFromSave()
     ContractorMod:CopyContractorModXML()
     -- Minimal: load worker name, position, style from XML
     if self.savegameFolderPath and self.ContractorModXmlFilePath then
-      createFolder(self.savegameFolderPath);
-      local xml;
+      createFolder(self.savegameFolderPath)
+      local xml
       if fileExists(self.ContractorModXmlFilePath) then
-        xml = XMLFile.load('ContractorMod', self.ContractorModXmlFilePath);
+        xml = XMLFile.load('ContractorMod', self.ContractorModXmlFilePath, ContractorMod.xmlSchema)
       else
-        xml = XMLFile.create('ContractorMod', self.ContractorModXmlFilePath, 'ContractorMod');
+        xml = XMLFile.create('ContractorMod', self.ContractorModXmlFilePath, 'ContractorMod', ContractorMod.xmlSchema)
         xml:save()
-        xml:delete();
-        return false;
-      end;
+        xml:delete()
+        return false
+      end
       local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
       for i = 1, num do
           local key = string.format("ContractorMod.workers.worker(%d)", i-1)
@@ -71,12 +84,12 @@ function ContractorMod:initFromSave()
           local pos = xml:getString(key.."#position")
           local rot = xml:getString(key.."#rotation")
           local style = PlayerStyle.new()
-          -- style:loadFromXMLFile(xml, key..".style")
+          style:loadFromXMLFile(xml, key..".style")
           local worker = ContractorModWorker:new(name, i, style)
           if ContractorMod.debug then print(pos) end
-        local posVector = string.getVector(pos);
+        local posVector = string.getVector(pos)
         if ContractorMod.debug then print("posVector "..tostring(posVector)) end
-        local rotVector = string.getVector(rot);
+        local rotVector = string.getVector(rot)
         worker.x = posVector[1]
         worker.y = posVector[2]
         worker.z = posVector[3]
@@ -84,7 +97,7 @@ function ContractorMod:initFromSave()
         worker.dy = rotVector[2]
         worker.rotY = rotVector[2]
         worker.dz = rotVector[3]
-        local vehicleID = xml:getString(key.."#vehicleID");
+        local vehicleID = xml:getString(key.."#vehicleID")
         if vehicleID ~= "0" then
           if ContractorMod.mapVehicleLoad ~= nil then
             -- map savegame vehicle id and network id
@@ -93,7 +106,7 @@ function ContractorMod:initFromSave()
             if vehicle ~= nil then
               if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
               worker.currentVehicle = vehicle
-              local currentSeat = xml:getInt(key.."#currentSeat");
+              local currentSeat = xml:getInt(key.."#currentSeat")
               if currentSeat ~= nil then
                 worker.currentSeat = currentSeat
               end
@@ -105,23 +118,23 @@ function ContractorMod:initFromSave()
     xmlKey = "ContractorMod.displaySettings.characterName"
     self.displaySettings = {}
     self.displaySettings.characterName = {}
-    local x = xml:getFloat(xmlKey .. string.format("#x"));
+    local x = xml:getFloat(xmlKey .. string.format("#x"))
     if x == nil then
       x = 0.9828
     end
     self.displaySettings.characterName.x = x
-    local y = xml:getFloat(xmlKey .. string.format("#y"));
+    local y = xml:getFloat(xmlKey .. string.format("#y"))
     if y == nil then
       y = 0.90
     end
     self.displaySettings.characterName.y = y
-    local size = xml:getFloat(xmlKey .. string.format("#size"));
+    local size = xml:getFloat(xmlKey .. string.format("#size"))
     if size == nil then
       size = 0.024
     end
     self.displaySettings.characterName.size = size
     xmlKey = "ContractorMod.displaySettings.playerName"
-    ContractorMod.displayPlayerNames = Utils.getNoNil(xml:getBool(xmlKey .. string.format("#displayPlayerNames")), true);
+    ContractorMod.displayPlayerNames = Utils.getNoNil(xml:getBool(xmlKey .. string.format("#displayPlayerNames")), true)
     self.numWorkers = #self.workers
     xml:delete()
     return self.numWorkers > 0
@@ -136,19 +149,19 @@ function ContractorMod:CopyContractorModXML()
       local modSettingsDir = ContractorMod.myCurrentModDirectory .. "../../modSettings"
       local xmlFilePath = modSettingsDir.."/ContractorMod.xml"
       if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_1") end
-      local xmlFile;
+      local xmlFile
       if not fileExists(xmlFilePath) then
         if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_2") end
         local xmlSourceFilePath = ContractorMod.myCurrentModDirectory .. "ContractorMod.xml"
-        local xmlSourceFile;
+        local xmlSourceFile
         if fileExists(xmlSourceFilePath) then
           if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_3") end
-          xmlSourceFile = loadXMLFile('ContractorMod', xmlSourceFilePath);
+          xmlSourceFile = loadXMLFile('ContractorMod', xmlSourceFilePath)
           createFolder(modSettingsDir)
-          saveXMLFileTo(xmlSourceFile, xmlFilePath);
+          saveXMLFileTo(xmlSourceFile, xmlFilePath)
           if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_4") end
         end
-      end;
+      end
     end
   end
 end
@@ -159,7 +172,7 @@ SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.o
     -- if self.isValid and self.xmlKey ~= nil then
     ContractorMod:onSaveCareerSavegame()
     -- end
-end);
+end)
 
 -- @doc store savegame vehicle id if worker is in this vehicle
 function ContractorMod:mapVehicleSave(vehicle, saveId)
@@ -188,19 +201,28 @@ function ContractorMod:preVehicleSave(xmlFile, key, usedModNames)
     ContractorMod:mapVehicleSave(self, tostring(saveId))
   end
 end
-Vehicle.saveToXMLFile = Utils.prependedFunction(Vehicle.saveToXMLFile, ContractorMod.preVehicleSave);
+Vehicle.saveToXMLFile = Utils.prependedFunction(Vehicle.saveToXMLFile, ContractorMod.preVehicleSave)
+
+function ContractorMod:registerXmlSchema()
+  if ContractorMod.debug then print("ContractorMod:registerXMLPaths ") end
+  self.xmlSchema = XMLSchema.new("ContractorMod")
+  self.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers#numWorkers", "Number of workers", nil, true)
+  self.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#name", "Name of worker", nil, true)
+  self.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#vehicleID", "ID of vehicle if any", nil, true)
+  PlayerStyle.registerSavegameXMLPaths(self.xmlSchema, "ContractorMod.workers.worker(?).style")
+end
 
 -- @doc Save workers info to restore them when starting game
 function ContractorMod:onSaveCareerSavegame()
   if ContractorMod.debug then print("ContractorMod:onSaveCareerSavegame ") end
   if self.workers ~= nil then
-    local xmlFile;
+    local xmlFile
     if fileExists(self.ContractorModXmlFilePath) then
-      xmlFile = XMLFile.load('ContractorMod', self.ContractorModXmlFilePath);
+      xmlFile = XMLFile.load('ContractorMod', self.ContractorModXmlFilePath, ContractorMod.xmlSchema)
     else
-      xmlFile = XMLFile.create('ContractorMod', self.ContractorModXmlFilePath, 'ContractorMod');
+      xmlFile = XMLFile.create('ContractorMod', self.ContractorModXmlFilePath, 'ContractorMod', ContractorMod.xmlSchema)
       xmlFile:save()
-    end;
+    end
 
     if xmlFile ~= nil then
       local rootXmlKey = "ContractorMod"
@@ -212,50 +234,34 @@ function ContractorMod:onSaveCareerSavegame()
       end
       
       local workerKey = rootXmlKey .. ".workers"
-      xmlFile:setInt(workerKey.."#numWorkers", self.numWorkers);
+      xmlFile:setInt(workerKey.."#numWorkers", self.numWorkers)
       for i = 1, self.numWorkers do
         local worker = self.workers[i]
-        local key = string.format(rootXmlKey .. ".workers.worker(%d)", i - 1);
-        xmlFile:setString(key.."#name", worker.name);
+        local key = string.format(rootXmlKey .. ".workers.worker(%d)", i - 1)
+        xmlFile:setString(key.."#name", worker.name)
+        worker.playerStyle:saveToXMLFile(xmlFile, key .. ".style")
         local pos = Utils.getNoNil(worker.x, "0.")..' '..Utils.getNoNil(worker.y, "0.")..' '..Utils.getNoNil(worker.z, "0.")
-        xmlFile:setString(key.."#position", pos);
+        xmlFile:setString(key.."#position", pos)
         local rot = Utils.getNoNil(worker.dx, "0.")..' '..Utils.getNoNil(worker.dy, "0.")..' '..Utils.getNoNil(worker.dz, "0.")
-        xmlFile:setString(key.."#rotation", rot);
+        xmlFile:setString(key.."#rotation", rot)
         local vehicleID = "0"
         if worker.currentVehicle ~= nil then
           vehicleID = worker.saveId
         end
-        xmlFile:setString(key.."#vehicleID", vehicleID);
+        xmlFile:setString(key.."#vehicleID", vehicleID)
       end
-      -- currentWorker.player:moveToAbsoluteInternal(0, -200, 0);
+      -- currentWorker.player:moveToAbsoluteInternal(0, -200, 0)
       local xmlKey = rootXmlKey .. ".displaySettings.characterName"
-      xmlFile:setFloat(xmlKey .. "#x", self.displaySettings.characterName.x);
-      xmlFile:setFloat(xmlKey .. "#y", self.displaySettings.characterName.y);
-      xmlFile:setFloat(xmlKey .. "#size", self.displaySettings.characterName.size);
+      xmlFile:setFloat(xmlKey .. "#x", self.displaySettings.characterName.x)
+      xmlFile:setFloat(xmlKey .. "#y", self.displaySettings.characterName.y)
+      xmlFile:setFloat(xmlKey .. "#size", self.displaySettings.characterName.size)
       xmlKey = rootXmlKey .. ".displaySettings.playerName"
-      xmlFile:setBool(xmlKey .. "#displayPlayerNames", ContractorMod.displayPlayerNames);
+      xmlFile:setBool(xmlKey .. "#displayPlayerNames", ContractorMod.displayPlayerNames)
       xmlFile:save()
       xmlFile:delete()
     end
   end
 end
-
-function ContractorMod:saveToXML()
-  if ContractorMod.debug then print("ContractorMod:saveToXML()") end
-    local savePath = g_currentMission.missionInfo.savegameDirectory .. "/ContractorMod.xml"
-    local xml = XMLFile.create("ContractorMod", savePath, "ContractorMod")
-    xml:setInt("ContractorMod.workers#numWorkers", self.numWorkers)
-    for i, worker in ipairs(self.workers) do
-        local key = string.format("ContractorMod.workers.worker(%d)", i-1)
-        xml:setString(key.."#name", worker.name)
-        xml:setString(key.."#position", string.format("%f %f %f", worker.x, worker.y, worker.z))
-        xml:setString(key.."#rotation", string.format("%f %f", worker.rotX, worker.rotY))
-        -- worker.playerStyle:saveToXMLFile(xml, key..".style")
-    end
-    xml:save()
-    xml:delete()
-end
--- GameSettings.saveToXMLFile = Utils.prependedFunction(GameSettings.saveToXMLFile, ContractorMod.saveToXML)
 
 -- @doc Set mapping between savegame vehicle id and vehicle network id when vehicle is loaded
 ContractorMod.appEnterableOnLoad = function(self, savegame)
@@ -271,7 +277,7 @@ ContractorMod.appEnterableOnLoad = function(self, savegame)
     local vehicleID = self.id
     -- Set mapping between savegame vehicle id and vehicle network id once loaded
     ContractorMod.mapVehicleLoad[tostring(saveId)] = vehicleID
-    -- DebugUtil.printTableRecursively(ContractorMod.mapVehicleLoad, " ", 1, 2);
+    -- DebugUtil.printTableRecursively(ContractorMod.mapVehicleLoad, " ", 1, 2)
   end
 end
 Enterable.onLoad = Utils.appendedFunction(Enterable.onLoad, ContractorMod.appEnterableOnLoad)
@@ -292,7 +298,7 @@ function ContractorMod:replaceGetDisableVehicleCharacterOnLeave(superfunc)
   end
   return true
 end
-Enterable.getDisableVehicleCharacterOnLeave = Utils.overwrittenFunction(Enterable.getDisableVehicleCharacterOnLeave, ContractorMod.replaceGetDisableVehicleCharacterOnLeave);
+Enterable.getDisableVehicleCharacterOnLeave = Utils.overwrittenFunction(Enterable.getDisableVehicleCharacterOnLeave, ContractorMod.replaceGetDisableVehicleCharacterOnLeave)
 
 function ContractorMod:switchWorker(newID)
   if ContractorMod.debug then print("ContractorMod:switchWorker() " + string(newID)) end
@@ -378,14 +384,14 @@ end
 function ContractorMod:replaceOnSwitchVehicle(superfunc, action, direction)
   ContractorMod:onSwitchVehicle(action)
 end
-PlayerInputComponent.onInputSwitchVehicle = Utils.overwrittenFunction(PlayerInputComponent.onInputSwitchVehicle, ContractorMod.replaceOnSwitchVehicle);
+PlayerInputComponent.onInputSwitchVehicle = Utils.overwrittenFunction(PlayerInputComponent.onInputSwitchVehicle, ContractorMod.replaceOnSwitchVehicle)
 
 function ContractorMod:preventOnSwitchVehicle(superfunc, value, direction)
   if ContractorMod.debug then print("ContractorMod:preventOnSwitchVehicle()") end
   print("We might prevent to switch vehicle from the map menu")
   superfunc(self, value, direction)
 end
-InGameMenuMapFrame.onSwitchVehicle = Utils.overwrittenFunction(InGameMenuMapFrame.onSwitchVehicle, ContractorMod.preventOnSwitchVehicle);
+InGameMenuMapFrame.onSwitchVehicle = Utils.overwrittenFunction(InGameMenuMapFrame.onSwitchVehicle, ContractorMod.preventOnSwitchVehicle)
 
 function ContractorMod:loadedMission() --[[----------------------------------------------------------------]] print("This is a development version of ContractorMod for FS25, which may and will contain errors, bugs.") end
 Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, ContractorMod.loadedMission)
@@ -437,5 +443,27 @@ PlayerInputComponent.registerGlobalPlayerActionEvents = Utils.appendedFunction(P
       end
     end
 end)
+
+-- Display character name in wardrobe screen
+function ContractorMod:beforeOnOpenWardrobeScreen()
+  if ContractorMod.debug then print("ContractorMod:beforeOnOpenWardrobeScreen ") end
+
+  --print("player"..tostring(g_localPlayer))
+  --print("model "..tostring(g_localPlayer.model))
+  --print("style "..tostring(g_localPlayer.model.style))
+  --DebugUtil.printTableRecursively(g_localPlayer.model, " ", 1, 2)
+  g_localPlayer:setStyleAsync(ContractorMod.workers[ContractorMod.currentID].playerStyle, false, nil, true)
+  g_currentMission.playerNickname = ContractorMod.workers[ContractorMod.currentID].name
+end
+ShopOthersFrame.onOpenWardrobeScreen = Utils.prependedFunction(ShopOthersFrame.onOpenWardrobeScreen, ContractorMod.beforeOnOpenWardrobeScreen)
+
+-- Change character name from wardrobe screen player nickname
+function ContractorMod:setPlayerNickname(player, nickname, userId, noEventSend)
+  if ContractorMod.debug then print("ContractorMod:setPlayerNickname "..tostring(nickname)) end
+  if ContractorMod.workers then
+    ContractorMod.workers[ContractorMod.currentID].name = nickname
+  end
+end
+FSBaseMission.setPlayerNickname = Utils.prependedFunction(FSBaseMission.setPlayerNickname, ContractorMod.setPlayerNickname)
 
 addModEventListener(ContractorMod);

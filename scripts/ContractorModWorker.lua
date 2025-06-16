@@ -23,7 +23,8 @@ function ContractorModWorker:new(name, index, workerStyle)
 
   self.name = name
   self.currentVehicle = nil
-  self.playerStyle = workerStyle
+  self.playerStyle = PlayerStyle.defaultStyle()
+  self.playerStyle:copyFrom(workerStyle)
 
   self.color = Farm.COLORS[index]
   if g_localPlayer ~= nil then
@@ -143,7 +144,8 @@ end
 -- @doc Teleport to target worker when switching
 function ContractorModWorker:afterSwitch(noEventSend)
   if ContractorModWorker.debug then print("ContractorModWorker:afterSwitch()") end
-  
+  g_localPlayer:setStyleAsync(self.playerStyle, false, nil, true)
+  g_currentMission.playerNickname = self.name
   if self.currentVehicle == nil then
     -- target worker is not in a vehicle
     if g_localPlayer ~= nil then --g_currentMission.controlPlayer and 
@@ -151,7 +153,7 @@ function ContractorModWorker:afterSwitch(noEventSend)
       -- setTranslation(g_currentMission.player.rootNode, self.x, self.y, self.z);
       -- g_currentMission.player:moveRootNodeToAbsolute(self.x, self.y-0.2, self.z);
       g_localPlayer:teleportTo(self.x, self.y, self.z)
-      -- g_localPlayer:setStyleAsync(self.playerStyle, false, nil, true)
+      
       -- g_localPlayer:setRotation(self.rotX, self.rotY)
       -- self.player.isEntered = true
       -- self.player.isControlled = true
