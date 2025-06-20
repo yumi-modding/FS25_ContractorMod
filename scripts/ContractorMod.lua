@@ -8,6 +8,7 @@ source(Utils.getFilename("scripts/cmPlayerInputComponent.lua", g_currentModDirec
 source(Utils.getFilename("scripts/cmSavegameController.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmShopOthersFrame.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmVehicle.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmWardrobeScreen.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/ContractorModWorker.lua", g_currentModDirectory))
 
 ContractorMod = {}

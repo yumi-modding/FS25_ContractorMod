@@ -35,7 +35,7 @@ SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.o
         if worker.currentVehicle ~= nil then
           vehicleID = worker.saveId
         end
-        xmlFile:setString(key.."#vehicleID", vehicleID)
+        xmlFile:setString(key.."#vehicleID", Utils.getNoNil(vehicleID, "0"))
       end
       -- currentWorker.player:moveToAbsoluteInternal(0, -200, 0)
       local xmlKey = rootXmlKey .. ".displaySettings.characterName"

@@ -146,6 +146,7 @@ function ContractorModWorker:afterSwitch(noEventSend)
   if ContractorModWorker.debug then print("ContractorModWorker:afterSwitch()") end
   g_localPlayer:setStyleAsync(self.playerStyle, false, nil, true)
   g_currentMission.playerNickname = self.name
+  g_localPlayer.playerHotspot:setColor(unpack(self.color))
   if self.currentVehicle == nil then
     -- target worker is not in a vehicle
     if g_localPlayer ~= nil then --g_currentMission.controlPlayer and 
