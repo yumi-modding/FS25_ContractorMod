@@ -30,8 +30,12 @@ function ContractorMod:init()
     ContractorMod.numWorkers = 2
     ContractorMod.workers = {}
     ContractorMod.shouldStopWorker = true
-    ContractorMod.switching = false 
+    ContractorMod.switching = false
     ContractorMod.displayPlayerNames = true
+    ContractorMod.wageSettings = {}
+    ContractorMod.wageSettings.defaultMonthlyWage = 0
+    ContractorMod.wageSettings.hourlyWageFactor = 1.0
+    g_messageCenter:subscribe(MessageType.PERIOD_CHANGED, self.onDayChanged, self)
 
     self:registerXmlSchema()
 
@@ -71,7 +75,29 @@ function ContractorMod:init()
             }
         }
     end
+
+    self:extendWageFunctions()
+
     g_currentMission.nickname = ContractorMod.workers[ContractorMod.currentID].name
+end
+
+function ContractorMod:extendWageFunctions()
+    for _, jt in g_currentMission.aiJobTypeManager.jobTypes do
+        jt_class = jt.classObject
+        jt_class.getPricePerMs = Utils.overwrittenFunction(jt_class.getPricePerMs, ContractorMod.getPricePerMs)
+    end
+end
+
+function ContractorMod.getPricePerMs(self, superFunc, ...)
+    return superFunc() * ContractorMod.wageSettings.hourlyWageFactor
+end
+
+function ContractorMod:onDayChanged()
+    local farm = g_farmManager:getFarmById(1)
+    for _, w in pairs(self.workers) do
+        farm:changeBalance(-w.wage, MoneyType.AI)
+        g_currentMission:addMoneyChange(-w.wage, 1, MoneyType.AI, true)
+    end
 end
 
 function ContractorMod:initFromSave()
@@ -90,44 +116,61 @@ function ContractorMod:initFromSave()
         xml:delete()
         return false
       end
+
+      ContractorMod.wageSettings.defaultMonthlyWage = xml:getInt("ContractorMod.wageSettings.monthlyWage#default") or 0
+      ContractorMod.wageSettings.hourlyWageFactor = xml:getFloat("ContractorMod.wageSettings.hourlyWage#factor") or 1.0
+
+      print(ContractorMod.wageSettings.defaultMonthlyWage)
+      print(ContractorMod.wageSettings.hourlyWageFactor)
+
       local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
       for i = 1, num do
           local key = string.format("ContractorMod.workers.worker(%d)", i-1)
-          local name = xml:getString(key.."#name")
-          local pos = xml:getString(key.."#position")
-          local rot = xml:getString(key.."#rotation")
-          local style = PlayerStyle.new()
-          style:loadFromXMLFile(xml, key..".style")
-          local worker = ContractorModWorker:new(name, i, style)
-          if ContractorMod.debug then print(pos) end
-        local posVector = string.getVector(pos)
-        if ContractorMod.debug then print("posVector "..tostring(posVector)) end
-        local rotVector = string.getVector(rot)
-        worker.x = posVector[1]
-        worker.y = posVector[2]
-        worker.z = posVector[3]
-        worker.dx = rotVector[1]
-        worker.dy = rotVector[2]
-        worker.rotY = rotVector[2]
-        worker.dz = rotVector[3]
-        local vehicleID = xml:getString(key.."#vehicleID")
-        if vehicleID ~= "0" then
-          if ContractorMod.mapVehicleLoad ~= nil then
-            -- map savegame vehicle id and network id
-            local saveId = ContractorMod.mapVehicleLoad[vehicleID]
-            local vehicle = NetworkUtil.getObject(tonumber(saveId))
-            if vehicle ~= nil then
-              if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
-              worker.currentVehicle = vehicle
-              local currentSeat = xml:getInt(key.."#currentSeat")
-              if currentSeat ~= nil then
-                worker.currentSeat = currentSeat
+          if xml:getString(key.."#name") ~= nil then
+            local name = xml:getString(key.."#name")
+            local wage = xml:getFloat(key.."#wage") or ContractorMod.wageSettings.defaultMonthlyWage
+            local pos = xml:getString(key.."#position")
+            local rot = xml:getString(key.."#rotation")
+            local style = PlayerStyle.new()
+            style:loadFromXMLFile(xml, key..".style")
+            local worker = ContractorModWorker:new(name, i, style)
+            if ContractorMod.debug then print(pos) end
+            local posVector = string.getVector(pos)
+            if ContractorMod.debug then print("posVector "..tostring(posVector)) end
+            local rotVector = string.getVector(rot)
+            worker.wage = wage
+            worker.x = posVector[1]
+            worker.y = posVector[2]
+            worker.z = posVector[3]
+            worker.dx = rotVector[1]
+            worker.dy = rotVector[2]
+            worker.rotY = rotVector[2]
+            worker.dz = rotVector[3]
+            local vehicleID = xml:getString(key.."#vehicleID")
+            if vehicleID ~= "0" then
+              if ContractorMod.mapVehicleLoad ~= nil then
+                -- map savegame vehicle id and network id
+                local saveId = ContractorMod.mapVehicleLoad[vehicleID]
+                local vehicle = NetworkUtil.getObject(tonumber(saveId))
+                if vehicle ~= nil then
+                  if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
+                  worker.currentVehicle = vehicle
+                  local currentSeat = xml:getInt(key.."#currentSeat")
+                  if currentSeat ~= nil then
+                    worker.currentSeat = currentSeat
+                  end
+                end
               end
             end
+            table.insert(ContractorMod.workers, worker)
+          else
+            local workerStyle = g_helperManager:getRandomHelperStyle()
+            table.insert(ContractorMod.workers, ContractorModWorker:new("Worker" .. i, i, workerStyle))
+            ContractorMod.workers[i].wage = ContractorMod.wageSettings.defaultMonthlyWage
           end
-        end
-        table.insert(ContractorMod.workers, worker)
-    end
+      end
+
+
     xmlKey = "ContractorMod.displaySettings.characterName"
     ContractorMod.displaySettings = {}
     ContractorMod.displaySettings.characterName = {}
@@ -184,7 +227,10 @@ function ContractorMod:registerXmlSchema()
   ContractorMod.xmlSchema = XMLSchema.new("ContractorMod")
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers#numWorkers", "Number of workers", nil, true)
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#name", "Name of worker", nil, true)
+  ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#wage", "Monthly Wage of worker", nil, true)
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#vehicleID", "ID of vehicle if any", nil, true)
+  ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.wageSettings.monthlyWage#default", "Default Wage of new workers", nil, true)
+  ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.wageSettings.hourlyWage#factor", "Factor Applied to hourly cost of all workers", nil, true)
   PlayerStyle.registerSavegameXMLPaths(ContractorMod.xmlSchema, "ContractorMod.workers.worker(?).style")
 end
 
@@ -210,7 +256,7 @@ function ContractorMod:onSwitchWorker(action)
       prevID = ContractorMod.currentID - 1
     else
       prevID = ContractorMod.numWorkers
-    end    
+    end
     self:setCurrentContractorModWorker(prevID)
   end
 end
