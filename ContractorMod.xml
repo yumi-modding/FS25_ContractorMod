@@ -8,7 +8,7 @@
      - Worker playerBodyIndex can be set from 1 to 4
        - for male character, use player01.xml file
        - for female character, use player02.xml file
-     - Other attributes should better be retrieved from ContractorMod.xml file in savegame directory once configured in wardrobe screen. 
+     - Other attributes should better be retrieved from ContractorMod.xml file in savegame directory once configured in wardrobe screen.
     If you want to modify some element on a savegame, you can edit similar file in corresponding savegame directory
     -->
     <workers numWorkers="4">
@@ -38,7 +38,7 @@
         </worker>
       </workers>
     <displaySettings>
-        <!-- 
+        <!--
           You can change here the position and size of current character name displayed on screen
           Default values used on FS17: x="0.9828" y="0.45" size="0.024"
         -->
@@ -49,4 +49,8 @@
         <!-- mods can be added here so they won't be overwritten if ContractorMod is updated -->
         <Passenger vehiclesName="$moddir$FS22_JohnDeere8r2016/series8R.xml" seatIndex="1" x="0.5494" y="2.3036" z="-1.3561" rx="0" ry="0" rz="0"/>
     </passengerSeats>
+    <wageSettings>
+        <monthlyWage default="0" />
+        <hourlyWage factor="1.0" />
+    </wageSettings>
 </ContractorMod>

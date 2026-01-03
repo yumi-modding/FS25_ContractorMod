@@ -19,13 +19,14 @@ SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.o
       if currentWorker ~= nil then
         currentWorker:beforeSwitch(true)
       end
-      
+
       local workerKey = rootXmlKey .. ".workers"
       xmlFile:setInt(workerKey.."#numWorkers", ContractorMod.numWorkers)
       for i = 1, ContractorMod.numWorkers do
         local worker = ContractorMod.workers[i]
         local key = string.format(rootXmlKey .. ".workers.worker(%d)", i - 1)
         xmlFile:setString(key.."#name", worker.name)
+        xmlFile:setFloat(key .. "#wage", worker.wage)
         worker.playerStyle:saveToXMLFile(xmlFile, key .. ".style")
         local pos = Utils.getNoNil(worker.x, "0.")..' '..Utils.getNoNil(worker.y, "0.")..' '..Utils.getNoNil(worker.z, "0.")
         xmlFile:setString(key.."#position", pos)
@@ -44,6 +45,10 @@ SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.o
       xmlFile:setFloat(xmlKey .. "#size", ContractorMod.displaySettings.characterName.size)
       xmlKey = rootXmlKey .. ".displaySettings.playerName"
       xmlFile:setBool(xmlKey .. "#displayPlayerNames", ContractorMod.displayPlayerNames)
+      xmlKey = rootXmlKey .. ".wageSettings.monthlyWage"
+      xmlFile:setInt(xmlKey .. "#default", ContractorMod.wageSettings.defaultMonthlyWage)
+      xmlKey = rootXmlKey .. ".wageSettings.hourlyWage"
+      xmlFile:setFloat(xmlKey .. "#factor", ContractorMod.wageSettings.hourlyWageFactor)
       xmlFile:save()
       xmlFile:delete()
     end
