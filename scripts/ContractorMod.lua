@@ -76,11 +76,6 @@ function ContractorMod:init()
         }
     end
 
-    print(ContractorMod.wageSettings.hourlyWageFactor)
-    for _, w in pairs(ContractorMod.workers) do
-        print(w.name .. ": " .. w.wage)
-    end
-
     self:extendWageFunctions()
 
     g_currentMission.nickname = ContractorMod.workers[ContractorMod.currentID].name
