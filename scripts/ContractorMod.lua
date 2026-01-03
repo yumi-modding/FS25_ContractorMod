@@ -166,6 +166,7 @@ function ContractorMod:initFromSave()
           else
             local workerStyle = g_helperManager:getRandomHelperStyle()
             table.insert(ContractorMod.workers, ContractorModWorker:new("Worker" .. i, i, workerStyle))
+            ContractorMod.workers[i].wage = ContractorMod.wageSettings.defaultMonthlyWage
           end
       end
 
