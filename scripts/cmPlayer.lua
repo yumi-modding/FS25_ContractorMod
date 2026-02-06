@@ -24,3 +24,34 @@ function cmPlayer:ManageLeaveVehicle(controlledVehicle)
     end
 
 end
+
+function cmPlayer:teleportToExitPoint(superfunc, vehicle, noEventSend)
+    if ContractorMod.debug then print("cmPlayer:teleportToExitPoint") end
+    -- printCallstack()
+    -- Prevent to teleport to exit point when switching between workers
+    if not ContractorMod.switching then
+        superfunc(self, vehicle, noEventSend)
+    end
+end
+Player.teleportToExitPoint = Utils.overwrittenFunction(Player.teleportToExitPoint, cmPlayer.teleportToExitPoint)
+
+-- FOR DEBUGGING
+-- function cmPlayer:teleportTo(superfunc, x, y, z, setNodeTranslation, noEventSend)
+--     if ContractorMod.debug then print(string.format("cmPlayer:teleportTo %d, %d, %d", x, y, z)) end
+--     printCallstack()
+--     superfunc(self, x, y, z, setNodeTranslation, noEventSend)
+-- end
+-- Player.teleportTo = Utils.overwrittenFunction(Player.teleportTo, cmPlayer.teleportTo)
+
+-- function cmPlayer:hide(superfunc, ...)
+--     if ContractorMod.debug then print("cmPlayer:hide") end
+--     printCallstack()
+--     superfunc(self, ...)
+-- end
+-- Player.hide = Utils.overwrittenFunction(Player.hide, cmPlayer.hide)
+
+-- PlayerTeleportEvent.run = Utils.overwrittenFunction(PlayerTeleportEvent.run, function(self, superfunc, ...)
+--     if ContractorMod.debug then print("PlayerTeleportEvent:run") end
+--     printCallstack()
+--     superfunc(self, ...)
+-- end)

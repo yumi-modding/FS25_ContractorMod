@@ -23,7 +23,7 @@ Enterable.onLoad = Utils.appendedFunction(Enterable.onLoad, cmEnterable.app_OnLo
 function cmEnterable:getDisableVehicleCharacterOnLeave(superfunc)
   if ContractorMod.debug then print("cmEnterable:getDisableVehicleCharacterOnLeave") end
   if ContractorMod.switching then
-    ContractorMod.switching = false
+    -- ContractorMod.switching = false
     if ContractorMod.debug then print("switching return false") end
     return false
   end
