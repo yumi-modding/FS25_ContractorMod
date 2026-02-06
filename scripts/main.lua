@@ -1,0 +1,48 @@
+source(Utils.getFilename("scripts/cmAIHotspot.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmEnterable.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmFSBaseMission.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmInGameMenuMapFrame.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmMission00.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmNPCManager.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmPlayer.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmPlayerInputComponent.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmSavegameController.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmShopOthersFrame.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmVehicle.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmWardrobeScreen.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/ContractorMod.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/ContractorModWorker.lua", g_currentModDirectory))
+
+-- TODO:  - Add option or replace Visit NPC with switch worker in Map view ["callback"] = self.onClickVisitPlace,
+--        - Check needsSaving not necessary for NPCSpot when used for worker 
+--        - Fix workerStyle changing in vehicle when switching other worker
+
+local function load(mission)
+    --print("load(mission)")
+    assert(contractormod == nil)
+
+    contractormod = ContractorMod:new(mission, g_i18n, g_inputBinding, g_gui, g_soundManager, modDirectory, modName)
+
+    getfenv(0)["g_contractormod"] = contractormod
+    addModEventListener(contractormod)
+
+end
+
+local function unload()
+    if not isEnabled() then return end
+
+    removeModEventListener(contractormod)
+
+    if contractormod ~= nil then
+        contractormod:delete()
+        contractormod = nil -- Allows garbage collecting
+        getfenv(0)["g_contractormod"] = nil
+    end
+end
+
+local function init()
+    FSBaseMission.delete = Utils.appendedFunction(FSBaseMission.delete, unload)
+    Mission00.load = Utils.prependedFunction(Mission00.load, load)
+end
+
+init()

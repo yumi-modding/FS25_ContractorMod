@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="98">
+<modDesc descVersion="105">
   <author>yumi</author>
-  <version>0.0.2.2</version>
+  <version>0.1.0.0</version>
   <contributors>yumi, mrbear, jujuokl, alpha117,FomaDNS</contributors>
   <title>
     <en>ContractorMod</en>
@@ -97,8 +97,7 @@ O arquivo ContractorMod.xml também contém configuração para passageiros para
   <l10n filenamePrefix="modDesc_l10n" /> <!-- Load the corresponding modDesc_l10n_<language>.XML file, or revert to 'en'/'de'. -->
 
   <extraSourceFiles>
-    <sourceFile filename="scripts/ContractorMod.lua" />
-    <sourceFile filename="scripts/ContractorModWorker.lua" />
+    <sourceFile filename="scripts/main.lua" />
   </extraSourceFiles>
   
   <actions>
