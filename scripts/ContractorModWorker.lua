@@ -105,7 +105,7 @@ function ContractorModWorker:beforeSwitch(noEventSend)
       -- source worker is not in a vehicle
       local x, y, z = g_localPlayer:getPosition()
       local distance = MathUtil.vector3Length(self.x - x, self.y - y, self.z - z)
-      print("ContractorModWorker: beforeSwitch distance "..tostring(distance))
+      -- print("ContractorModWorker: beforeSwitch distance "..tostring(distance))
       self.x, self.y, self.z, self.rotY = g_localPlayer:getPosition()
       self.yaw = g_localPlayer:getGraphicalYaw()
       if ContractorModWorker.debug then print(string.format("ContractorModWorker:beforeSwitch not in vehicle %d,%d,%d | %d", self.x, self.y, self.z, self.yaw)) end
