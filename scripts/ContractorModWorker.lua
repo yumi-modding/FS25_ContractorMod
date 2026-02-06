@@ -214,7 +214,6 @@ function ContractorModWorker:afterSwitch(noEventSend)
       end
       g_localPlayer:teleportTo(self.x, self.y, self.z, true, true)
       g_localPlayer.mover:setMovementYaw(self.yaw)
-      -- g_localPlayer:setStyleAsync(self.playerStyle, nil, false)
     end
 
   else
