@@ -12,28 +12,41 @@ ContractorModWorker_mt = Class(ContractorModWorker);
 
 ContractorModWorker.debug = false --true --
 
-function ContractorModWorker:getParentComponent(node)
-  return self.graphicsRootNode;
-end;
-
 function ContractorModWorker:new(name, index, workerStyle)
   if ContractorModWorker.debug then print("ContractorModWorker:new()") end
   local self = {};
   setmetatable(self, ContractorModWorker_mt);
 
   self.name = name
+  self.index = index
   self.currentVehicle = nil
-  self.playerStyle = PlayerStyle.defaultStyle()
+  self.yaw = 0.0
+  self.playerStyle = PlayerStyle.new()
   self.playerStyle:copyFrom(workerStyle)
+  self.npc = g_npcManager:getNPCByName("HELPER" .. index)
+  self.npc.playerGraphics:setIsFacialAnimationEnabled(false)
+  self.npc.playerGraphics:setStyleAsync(workerStyle, self.npc.loadCharacterFinished, self.npc, {})
+  self.npc.title = name
+  self.npc.mapHotspot.icon:setColor(unpack(Farm.COLORS[index]))
+  self.npc.mapHotspot.iconSmall:setColor(unpack(Farm.COLORS[index]))
+  if workerStyle:getIsMale() then
+    -- self.npc.mapHotspot.icon:setImageFilename(Utils.getFilename("images/maleHelper.png", g_currentModDirectory))
+    self.npc.imageFilename = g_npcManager:getNPCByName("HELPER").imageFilename
+  else
+    -- self.npc.mapHotspot.icon:setImageFilename(Utils.getFilename("images/femaleHelper.png", g_currentModDirectory))
+    self.npc.imageFilename = g_npcManager:getNPCByName("ANIMAL_DEALER").imageFilename
+  end
+
+  -- self.npc.isActive = true
+  -- DebugUtil.printTableRecursively(self.npc, " ", 1, 1)
 
   self.color = Farm.COLORS[index]
   if g_localPlayer ~= nil then
     self.x, self.y, self.z, self.rotY = g_localPlayer:getPosition()
-    self.dx, self.dy, self.dz = localDirectionToWorld(g_localPlayer.rootNode, 0, 0, 1);
-    self.rotX = 0.;
-    -- self.rotY = 0.73;
     self.x = self.x + (1 * index)
+    self.yaw = g_localPlayer:getGraphicalYaw()
   end
+  self.display_x, self.display_y, self.display_z = 0, 0, 0
   return self
 end
 
@@ -65,9 +78,8 @@ function ContractorModWorker:displayName(contractorMod)
       renderText(0.9828, 0.42, 0.012, "seat:" .. tostring(self.currentSeat) );
     end
     renderText(0.9828, 0.41, 0.012, self.name);
-    renderText(0.9828, 0.40, 0.012, "x:" .. tostring(self.x) .. " y:" .. tostring(self.y) .. " z:" .. tostring(self.z));
-    renderText(0.9828, 0.39, 0.012, "dx:" .. tostring(self.dx) .. " dy:" .. tostring(self.dy) .. " dz:" .. tostring(self.dz));
-    renderText(0.9828, 0.38, 0.012, "rotX:" .. tostring(self.rotX) .. " rotY:" .. tostring(self.rotY));
+    renderText(0.9828, 0.40, 0.012, "x:" .. tostring(self.display_x) .. " y:" .. tostring(self.display_y) .. " z:" .. tostring(self.display_z));
+    renderText(0.9828, 0.39, 0.012, "yaw:" .. tostring(self.yaw));
     -- renderText(0.9828, 0.37, 0.012, "graphicsRotY:" .. tostring(self.player.graphicsRotY));
     -- renderText(0.9828, 0.36, 0.012, "targetGraphicsRotY:" .. tostring(self.player.targetGraphicsRotY));
     renderText(0.9828, 0.35, 0.012, "shouldStopWorker:  " .. tostring(contractorMod.shouldStopWorker));
@@ -91,10 +103,14 @@ function ContractorModWorker:beforeSwitch(noEventSend)
       -- source worker is passenger in a vehicle
     else
       -- source worker is not in a vehicle
+      local x, y, z = g_localPlayer:getPosition()
+      local distance = MathUtil.vector3Length(self.x - x, self.y - y, self.z - z)
+      print("ContractorModWorker: beforeSwitch distance "..tostring(distance))
       self.x, self.y, self.z, self.rotY = g_localPlayer:getPosition()
-      if ContractorModWorker.debug then print("ContractorModWorker: "..tostring(self.x)..", "..tostring(self.y)..", "..tostring(self.z)) end
-      self.rotX = g_localPlayer.rotX;
-      self.rotY = g_localPlayer.rotY;
+      self.yaw = g_localPlayer:getGraphicalYaw()
+      if ContractorModWorker.debug then print(string.format("ContractorModWorker:beforeSwitch not in vehicle %d,%d,%d | %d", self.x, self.y, self.z, self.yaw)) end
+      -- self.rotX = g_localPlayer.rotX;
+      -- self.rotY = g_localPlayer.rotY;
 -- self.player.isEntered = false
 -- self.player:setStyleAsync(self.playerStyle, nil, noEventSend)
 -- -- self.playerStyle:print()
@@ -109,7 +125,24 @@ function ContractorModWorker:beforeSwitch(noEventSend)
     
       -- self.player:moveRootNodeToAbsolute(self.x, self.y, self.z)
 -- self.player:moveTo(self.x, self.y-0.8, self.z, true, true)
-      g_localPlayer:teleportTo(self.x, self.y, self.z)
+      -- g_localPlayer:teleportTo(self.x, self.y, self.z)
+
+      -- DebugUtil.printTableRecursively(self, " ", 1, 1)
+      -- npc = g_npcManager:getNPCByName("HELPER" ..self.index)
+      local spot = NPCSpot.create(tostring(g_time), self.npc, self.x, self.y, self.z, 0, 0, 0, false) --g_npcManager:getAvailableSpot(npc)
+      spot:activate()
+      spot.isAvailable = true
+      -- spot.needsSaving = true
+      g_npcManager:addSpot(spot)
+      
+      self.npc:setSpot(spot)
+      self:setYawInstant(g_localPlayer:getGraphicalYaw())
+-- self.npc.x = self.x
+-- self.npc.y = self.y
+-- self.npc.z = self.z
+-- self.npc:raiseActive()
+-- self.npc.needPositionUpdate = true
+-- DebugUtil.printTableRecursively(self.npc, " ", 1, 1)
       -- local x, y, z = getWorldTranslation(spawnPoint)
       -- local dx, _, dz = localDirectionToWorld(spawnPoint, 0, 0, -1)
       -- local dx, _, dz = localDirectionToWorld(g_currentMission.player.rootNode, 0, 0, -1)
@@ -132,10 +165,11 @@ function ContractorModWorker:beforeSwitch(noEventSend)
     -- source worker is in a vehicle
     self.x, self.y, self.z = getWorldTranslation(self.currentVehicle.rootNode)
     self.y = self.y + 2 --to avoid being under the ground
-    self.dx, self.dy, self.dz = localDirectionToWorld(self.currentVehicle.rootNode, 0, 0, 1);
+    local dx, _, dz = localDirectionToWorld(self.currentVehicle.rootNode, 0, 0, 1)
+    self.yaw = MathUtil.getYRotationFromDirection(dx, dz) or 0.0
 
     if noEventSend == nil or noEventSend == false then
-      if ContractorModWorker.debug then print("ContractorModWorker: sendEvent(onLeaveVehicle") end
+      if ContractorModWorker.debug then print(string.format("ContractorModWorker: sendEvent(onLeaveVehicle %d, %d, %d", self.x, self.y, self.z)) end
       g_localPlayer:leaveVehicle()
     end
   end
@@ -153,8 +187,21 @@ function ContractorModWorker:afterSwitch(noEventSend)
       -- if ContractorModWorker.debug then print("ContractorModWorker: moveTo "..tostring(g_localPlayer.model.style.playerName)); end
       -- setTranslation(g_currentMission.player.rootNode, self.x, self.y, self.z);
       -- g_currentMission.player:moveRootNodeToAbsolute(self.x, self.y-0.2, self.z);
-      g_localPlayer:teleportTo(self.x, self.y, self.z)
-      
+      local spot = self.npc:getSpot()
+      self.npc:setSpot(nil)                     -- unset its spot
+      g_npcManager:removeSpot(spot)        -- optionally remove that spot entirely
+      g_currentMission.activatableObjectsSystem:removeActivatable(self.npc.activatable)
+      -- optionally delete or unregister the npc if needed
+      -- npc = g_npcManager:getNPCByName("HELPER" .. self.index)
+      self.npc.x = 0
+      self.npc.y = -200
+      self.npc.z = 0
+      self.npc.isActive = false  -- NPCManager.lua:250: attempt to index nil with 'getIsAvailable'
+      self.npc:updateVisibility()
+      -- self.npc:updatePosition()
+      -- self.npc:raiseActive()
+      -- self.npc.needPositionUpdate = true
+      -- DebugUtil.printTableRecursively(self, " ", 1, 1)
       -- g_localPlayer:setRotation(self.rotX, self.rotY)
       -- self.player.isEntered = true
       -- self.player.isControlled = true
@@ -165,6 +212,8 @@ function ContractorModWorker:afterSwitch(noEventSend)
         print("ContractorModWorker: setStyleAsync ");
         -- DebugUtil.printTableRecursively(self.playerStyle, " ", 1, 3)
       end
+      g_localPlayer:teleportTo(self.x, self.y, self.z, true, true)
+      g_localPlayer.mover:setMovementYaw(self.yaw)
       -- g_localPlayer:setStyleAsync(self.playerStyle, nil, false)
     end
 
@@ -183,3 +232,16 @@ function ContractorModWorker:afterSwitch(noEventSend)
   end
 end
 
+function ContractorModWorker:setYawInstant(yaw)
+	self.npc.rotY = yaw
+	if self.npc.node ~= nil then
+		setWorldRotation(self.npc.node, self.npc.rotX, yaw, self.npc.rotZ)
+	end
+	if self.npc.playerGraphics ~= nil then
+		self.npc.playerGraphics:setModelYaw(yaw)
+	end
+	if self.npc.isServer then
+		-- ensure clients are updated
+		self.npc:raiseDirtyFlags(self.npc.dirtyFlag)
+	end
+end

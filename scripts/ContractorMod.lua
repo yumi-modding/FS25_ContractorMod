@@ -1,19 +1,22 @@
-source(Utils.getFilename("scripts/cmAIHotspot.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmEnterable.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmFSBaseMission.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmInGameMenuMapFrame.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmMission00.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmPlayer.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmPlayerInputComponent.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmSavegameController.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmShopOthersFrame.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmVehicle.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/cmWardrobeScreen.lua", g_currentModDirectory))
-source(Utils.getFilename("scripts/ContractorModWorker.lua", g_currentModDirectory))
-
 ContractorMod = {}
 ContractorMod.debug = false --true --
 
+
+local modDirectory = g_currentModDirectory
+local modSettingsDir = g_modSettingsDirectory
+local ContractorMod_mt = Class(ContractorMod)
+
+function ContractorMod:new(mission, i18n, inputBinding, gui, soundManager, modDirectory, modName)
+    --print("ContractorMod:new")
+    local self = setmetatable({}, ContractorMod_mt)
+
+    self.isServer = mission:getIsServer()
+    self.isClient = mission:getIsClient()
+    self.modDirectory = modDirectory
+    self.modName = modName
+
+    return self
+end
 -- Create multiple players and add them to the PlayerSystem
 --local player1 = Player.new(...)
 --local player2 = Player.new(...)
@@ -23,6 +26,13 @@ ContractorMod.debug = false --true --
 
 -- Switch control
 -- g_playerSystem:setLocalPlayer(player2) -- Now you control player2
+
+---Called when the player clicks the Start button
+function ContractorMod:onMissionStart(mission)
+    print("ContractorMod:onMissionStart")
+
+    self:init()
+end
 
 function ContractorMod:init()
   if ContractorMod.debug then print("ContractorMod:init()") end
@@ -95,7 +105,7 @@ function ContractorMod:initFromSave()
           local key = string.format("ContractorMod.workers.worker(%d)", i-1)
           local name = xml:getString(key.."#name")
           local pos = xml:getString(key.."#position")
-          local rot = xml:getString(key.."#rotation")
+          local yaw = xml:getString(key.."#yaw")
           local style = PlayerStyle.new()
           style:loadFromXMLFile(xml, key..".style")
           local worker = ContractorModWorker:new(name, i, style)
@@ -106,10 +116,7 @@ function ContractorMod:initFromSave()
         worker.x = posVector[1]
         worker.y = posVector[2]
         worker.z = posVector[3]
-        worker.dx = rotVector[1]
-        worker.dy = rotVector[2]
-        worker.rotY = rotVector[2]
-        worker.dz = rotVector[3]
+        worker.yaw = tonumber(yaw) or 0.0
         local vehicleID = xml:getString(key.."#vehicleID")
         if vehicleID ~= "0" then
           if ContractorMod.mapVehicleLoad ~= nil then
@@ -184,6 +191,7 @@ function ContractorMod:registerXmlSchema()
   ContractorMod.xmlSchema = XMLSchema.new("ContractorMod")
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers#numWorkers", "Number of workers", nil, true)
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#name", "Name of worker", nil, true)
+  ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#yaw", "Rotation (yaw) of worker", nil, true)
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#vehicleID", "ID of vehicle if any", nil, true)
   PlayerStyle.registerSavegameXMLPaths(ContractorMod.xmlSchema, "ContractorMod.workers.worker(?).style")
 end
@@ -261,4 +269,13 @@ function ContractorMod:draw()
   end
 end
 
-addModEventListener(ContractorMod);
+function ContractorMod:update(dt)
+  if ContractorMod.workers ~= nil then
+    if #ContractorMod.workers > 0 then
+      local currentWorker = ContractorMod.workers[ContractorMod.currentID]
+      if currentWorker ~= nil then
+        currentWorker.display_x, currentWorker.display_y, currentWorker.display_z = g_localPlayer:getPosition()
+      end
+    end
+  end
+end
