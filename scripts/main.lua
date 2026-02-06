@@ -17,6 +17,14 @@ source(Utils.getFilename("scripts/ContractorModWorker.lua", g_currentModDirector
 --        - Check needsSaving not necessary for NPCSpot when used for worker 
 --        - Fix workerStyle changing in vehicle when switching other worker
 
+local contractormod
+
+local function isEnabled()
+    -- Normally this code never runs if ContractorMod was not active. However, in development mode
+    -- this might not always hold true.
+    return contractormod ~= nil
+end
+
 local function load(mission)
     --print("load(mission)")
     assert(contractormod == nil)
