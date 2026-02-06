@@ -29,8 +29,8 @@ SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.o
         worker.playerStyle:saveToXMLFile(xmlFile, key .. ".style")
         local pos = Utils.getNoNil(worker.x, "0.")..' '..Utils.getNoNil(worker.y, "0.")..' '..Utils.getNoNil(worker.z, "0.")
         xmlFile:setString(key.."#position", pos)
-        local rot = Utils.getNoNil(worker.dx, "0.")..' '..Utils.getNoNil(worker.dy, "0.")..' '..Utils.getNoNil(worker.dz, "0.")
-        xmlFile:setString(key.."#rotation", rot)
+        local yaw = tostring(Utils.getNoNil(worker.yaw, "0.0"))
+        xmlFile:setString(key.."#yaw", yaw)
         local vehicleID = "0"
         if worker.currentVehicle ~= nil then
           vehicleID = worker.saveId
