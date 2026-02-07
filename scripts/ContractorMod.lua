@@ -1,5 +1,5 @@
 ContractorMod = {}
-ContractorMod.debug = false --true --
+ContractorMod.debug = true --false --
 
 
 local modDirectory = g_currentModDirectory
@@ -16,6 +16,11 @@ function ContractorMod:new(mission, i18n, inputBinding, gui, soundManager, modDi
     self.modName = modName
 
     return self
+end
+
+function ContractorMod:delete()
+    --print("ContractorMod:delete")
+
 end
 -- Create multiple players and add them to the PlayerSystem
 --local player1 = Player.new(...)
