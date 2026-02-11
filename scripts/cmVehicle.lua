@@ -18,8 +18,9 @@ function cmVehicle:mapVehicleSave(vehicle, saveId)
     if #ContractorMod.workers > 0 then
       for i = 1, ContractorMod.numWorkers do
         local worker = ContractorMod.workers[i]
-        if worker ~= nil and worker.currentVehicle ~= nil then
-          if vehicle == worker.currentVehicle then
+        if worker ~= nil then
+          local currentVehicle = ContractorMod:getWorkerVehicle(worker)
+          if currentVehicle ~= nil and vehicle == currentVehicle then
             -- store savegame vehicle id 
             worker.saveId = saveId
           end
