@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
   <author>yumi</author>
-  <version>0.1.0.4</version>
+  <version>0.1.0.5</version>
   <contributors>yumi, mrbear, jujuokl, alpha117,FomaDNS</contributors>
   <title>
     <en>ContractorMod</en>
@@ -24,9 +24,10 @@ This mod is compatible with CoursePlay and FollowMe mods.
 So, for example, when using FollowMe, one character will be the Leader and another one the Follower.
 Characters can be seen on the minimap when activating default category (the last one represented by a house) in the map overview screen.
 
-Name, gender, color, body, hair, accessories and number of characters can be changed in ContractorMod.xml file located in modsSettings directory for new games.
+TO FIX: Name, gender, color, body, hair, accessories and number of characters can be changed in ContractorMod.xml file located in modSettings directory for new games.
 Once a game has been saved, they can be changed in ContractorMod.xml file present in related savegame folder.
-ContractorMod.xml file also contains configuration for passengers for mods vehicles. You can add your own mods here.
+BETA VERSION: Passenger mode can be activated in ContractorMod.xml file by setting enablePassenger to true, then you can enter vehicles as passenger and use the camera.
+TO IMPLEMENT: ContractorMod.xml file also contains configuration for passengers for mods vehicles. You can add your own mods here.
 ]]></en>
     <de><![CDATA[
 Dieser Mod ermöglicht das Simulieren einer definierten Anzahl von Charakteren, die Du während eines Einzelspieler-Spiels einzeln kontrollierst.
@@ -45,7 +46,7 @@ Dieser Mod ist kompatibel mit CoursePlay und FollowMe.
 So wird zum Beispiel bei der Verwendung von FollowMe ein Charakter der Leader und ein weiterer der Follower sein.
 Charaktere können auf der Minikarte gesehen werden, wenn die Standardkategorie (die letzte durch ein Haus repräsentiert) im Kartenübersichtsbildschirm aktiviert wird.
 
-Name, Geschlecht, Farbe, Körper, Haar, Accessoires und Anzahl der Zeichen können in der ContractorMod.xml Datei im Ordner modsSettings für neue Spiele geändert werden.
+Name, Geschlecht, Farbe, Körper, Haar, Accessoires und Anzahl der Zeichen können in der ContractorMod.xml Datei im Ordner modSettings für neue Spiele geändert werden.
 Sobald ein Spiel gespeichert wurde, kann es in der Datei ContractorMod.xml geändert werden, die im zugehörigen Spielstandsordner vorhanden ist.
 ContractorMod.xml enthält auch die Konfiguration von Passagieren für Mod-Fahrzeuge. Sie können hier Ihre eigenen Mods hinzufügen.
 ]]></de>
@@ -66,7 +67,7 @@ Ce mod est compatible avec les mods CoursePlay et FollowMe.
 Ainsi, en mode FollowMe par exemple, un perso sera le Leader et un autre perso le Follower.
 Les perso sont visibles sur la minimap lorsque la catégorie par défaut (la dernière représentée par une maison) est activée dans la vue Aperçu de la carte.
 
-Le nom, le genre, la couleur, le corps, les cheveux, les accessoires et le nombre de perso peuvent être modifiés dans le fichier ContractorMod.xml situé dans le dossier modsSettings pour les nouvelles parties.
+Le nom, le genre, la couleur, le corps, les cheveux, les accessoires et le nombre de perso peuvent être modifiés dans le fichier ContractorMod.xml situé dans le dossier modSettings pour les nouvelles parties.
 Une fois la partie sauvegardée, les modifications se font dans le fichier ContractorMod.xml du répertoire de sauvegarde habituel (savegame..).
 Le fichier ContractorMod.xml contient aussi la configuration des passagers pour les véhicules mods. Vous pouvez ajoutez vos propres mods ici.
 ]]></fr>

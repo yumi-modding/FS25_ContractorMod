@@ -1,5 +1,6 @@
 source(Utils.getFilename("scripts/cmAIHotspot.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmEnterable.lua", g_currentModDirectory))
+source(Utils.getFilename("scripts/cmEnterablePassenger.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmFSBaseMission.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmInGameMenuMapFrame.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmMission00.lua", g_currentModDirectory))
@@ -12,10 +13,13 @@ source(Utils.getFilename("scripts/cmVehicle.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/cmWardrobeScreen.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/ContractorMod.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/ContractorModWorker.lua", g_currentModDirectory))
+-- source(Utils.getFilename("scripts/ContractorModTestRunner.lua", g_currentModDirectory))
 
--- TODO:  - Add option or replace Visit NPC with switch worker in Map view ["callback"] = self.onClickVisitPlace,
---        - Check needsSaving not necessary for NPCSpot when used for worker 
---        - Fix workerStyle changing in vehicle when switching other worker
+-- TODO:
+-- Init from modSettings for new game instead of default values
+-- Add option or replace Visit NPC with switch worker in Map view ["callback"] = self.onClickVisitPlace,
+-- Prevent removing character when AIJob (like goto) done
+-- Using first person camera when driving can lead to activate passenger camera if any, then crash
 
 local contractormod
 

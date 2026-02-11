@@ -1,7 +1,7 @@
 ContractorMod = {}
 ContractorMod.debug = true --false --
 
-
+-- KO: Driver exists with passenger
 local modDirectory = g_currentModDirectory
 local modSettingsDir = g_modSettingsDirectory
 local ContractorMod_mt = Class(ContractorMod)
@@ -47,6 +47,7 @@ function ContractorMod:init()
     ContractorMod.shouldStopWorker = true
     ContractorMod.switching = false 
     ContractorMod.displayPlayerNames = true
+    ContractorMod.enablePassenger = false
 
     self:registerXmlSchema()
 
@@ -88,6 +89,45 @@ function ContractorMod:init()
     end
     g_currentMission.nickname = ContractorMod.workers[ContractorMod.currentID].name
 end
+
+-- ===== ACCESSOR FUNCTIONS =====
+-- These return live state for the active worker and stored state for others
+
+-- Get current vehicle for a worker (live for active, stored for inactive)
+function ContractorMod:getWorkerVehicle(worker)
+  if worker.index == ContractorMod.currentID and g_localPlayer ~= nil then
+    return g_localPlayer:getCurrentVehicle()
+  end
+  return worker.currentVehicle
+end
+
+-- Get position of a worker (live for active, stored for inactive)
+function ContractorMod:getWorkerPosition(worker)
+  if worker.index == ContractorMod.currentID and g_localPlayer ~= nil then
+    return g_localPlayer:getPosition()
+  end
+  return worker.x, worker.y, worker.z
+end
+
+-- Get yaw (rotation) of a worker (live for active, stored for inactive)
+function ContractorMod:getWorkerYaw(worker)
+  if worker.index == ContractorMod.currentID and g_localPlayer ~= nil then
+    return g_localPlayer:getGraphicalYaw()
+  end
+  return worker.yaw
+end
+
+-- Get seat in vehicle for a worker (live for active, stored for inactive)
+function ContractorMod:getWorkerSeat(worker)
+  if worker.index == ContractorMod.currentID and g_localPlayer ~= nil then
+    local vehicle = g_localPlayer:getCurrentVehicle()
+    if vehicle and vehicle.spec_enterable then
+      return vehicle.spec_enterable.playerSeat or worker.currentSeat
+    end
+  end
+  return worker.currentSeat
+end
+-- ===== END ACCESSORS =====
 
 function ContractorMod:initFromSave()
   if ContractorMod.debug then print("ContractorMod:initFromSave()") end
@@ -160,6 +200,7 @@ function ContractorMod:initFromSave()
     ContractorMod.displaySettings.characterName.size = size
     xmlKey = "ContractorMod.displaySettings.playerName"
     ContractorMod.displayPlayerNames = Utils.getNoNil(xml:getBool(xmlKey .. string.format("#displayPlayerNames")), true)
+    ContractorMod.enablePassenger = Utils.getNoNil(xml:getBool("ContractorMod.workers#enablePassenger"), false)
     ContractorMod.numWorkers = #ContractorMod.workers
     xml:delete()
     return ContractorMod.numWorkers > 0
@@ -195,6 +236,7 @@ function ContractorMod:registerXmlSchema()
   if ContractorMod.debug then print("ContractorMod:registerXMLPaths ") end
   ContractorMod.xmlSchema = XMLSchema.new("ContractorMod")
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers#numWorkers", "Number of workers", nil, true)
+  ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers#enablePassenger", "Ability to enter vehicles as passenger", nil, false)
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#name", "Name of worker", nil, true)
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#yaw", "Rotation (yaw) of worker", nil, true)
   ContractorMod.xmlSchema:register(XMLValueType.STRING, "ContractorMod.workers.worker(?)#vehicleID", "ID of vehicle if any", nil, true)
@@ -208,7 +250,6 @@ function ContractorMod:onSwitchWorker(action)
     if ContractorMod.debug then print('ContractorMod_NEXTWORKER pressed') end
     local nextID = 0
     if ContractorMod.debug then print("ContractorMod: ContractorMod.currentID " .. tostring(ContractorMod.currentID)) end
-    if ContractorMod.debug then print("ContractorMod: ContractorMod.numWorkers " .. tostring(ContractorMod.numWorkers)) end
     if ContractorMod.currentID < ContractorMod.numWorkers then
       nextID = ContractorMod.currentID + 1
     else
@@ -284,3 +325,27 @@ function ContractorMod:update(dt)
     end
   end
 end
+
+function ContractorMod:isControlledByWorker(vehicle)
+  -- if ContractorMod.debug then print("ContractorMod:isControlledByWorker()") end
+  if ContractorMod.workers ~= nil then
+    for _, worker in pairs(ContractorMod.workers) do
+      local currentVehicle = ContractorMod:getWorkerVehicle(worker)
+      local seat = ContractorMod:getWorkerSeat(worker)
+      if currentVehicle ~= nil and vehicle ~= nil and currentVehicle == vehicle and seat == nil then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+function ContractorMod:dumpWorkers()
+  if ContractorMod.debug then print("ContractorMod:dumpWorkers()") end
+  if ContractorMod.workers ~= nil then
+    DebugUtil.printTableRecursively(ContractorMod.workers, "  ", 1, 2)
+  end
+end
+addConsoleCommand("cmDumpWorkers", "Dump ContractorMod workers for debug", "dumpWorkers", ContractorMod)
+
+    
