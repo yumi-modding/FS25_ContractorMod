@@ -46,6 +46,13 @@ function cmEnterable:restoreVehicleCharacter(superfunc)
 end
 Enterable.restoreVehicleCharacter = Utils.overwrittenFunction(Enterable.restoreVehicleCharacter, cmEnterable.restoreVehicleCharacter)
 
+-- Keep current worker character when activating AIJob helper, prevent to set random character
+function cmEnterable:setRandomVehicleCharacter(superfunc, helper)
+  if ContractorMod.debug then print("cmEnterable:setRandomVehicleCharacter") end
+  return
+end
+Enterable.setRandomVehicleCharacter = Utils.overwrittenFunction(Enterable.setRandomVehicleCharacter, cmEnterable.setRandomVehicleCharacter)
+
 -- Update correctly characters in vehicles
 function cmEnterable:onPlayerStyleChanged(superfunc,style, userId)
   if ContractorMod.debug then print("cmEnterable:onPlayerStyleChanged") end
