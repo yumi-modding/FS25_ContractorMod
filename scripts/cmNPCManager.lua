@@ -33,20 +33,12 @@ end
 function cmNPCManager:loadMapData(xmlFile, missionInfo, baseDirectory)
     print("cmNPCManager:loadMapData")
     NPCManager:superClass().loadMapData(self)
-	local filename = getXMLString(xmlFile, "map.npcs#filename")
-	if filename ~= nil then
-		local xmlFilename = Utils.getFilename(filename, baseDirectory)
-		self.npcXMLFile = XMLFile.load("npcsXML", xmlFilename, NPCManager.xmlSchema)
-		if self.npcXMLFile == nil then
-			return false
-		end
-    	cmNPCManager:loadNPC(self.npcXMLFile, "HELPER1", missionInfo, baseDirectory)
-    	cmNPCManager:loadNPC(self.npcXMLFile, "HELPER2", missionInfo, baseDirectory)
-    	cmNPCManager:loadNPC(self.npcXMLFile, "HELPER3", missionInfo, baseDirectory)
-    	cmNPCManager:loadNPC(self.npcXMLFile, "HELPER4", missionInfo, baseDirectory)
-		for _, spot in pairs(g_npcManager.uniqueIdToSpot) do
-			spot:activate()
-		end
-    end
+	cmNPCManager:loadNPC(nil, "HELPER1", missionInfo, baseDirectory)
+	cmNPCManager:loadNPC(nil, "HELPER2", missionInfo, baseDirectory)
+	cmNPCManager:loadNPC(nil, "HELPER3", missionInfo, baseDirectory)
+	cmNPCManager:loadNPC(nil, "HELPER4", missionInfo, baseDirectory)
+	for _, spot in pairs(g_npcManager.uniqueIdToSpot) do
+		spot:activate()
+	end
 end
 NPCManager.loadMapData = Utils.appendedFunction(NPCManager.loadMapData, cmNPCManager.loadMapData)
