@@ -33,10 +33,10 @@ end
 function cmNPCManager:loadMapData(xmlFile, missionInfo, baseDirectory)
     print("cmNPCManager:loadMapData")
     NPCManager:superClass().loadMapData(self)
-	cmNPCManager:loadNPC(nil, "HELPER1", missionInfo, baseDirectory)
-	cmNPCManager:loadNPC(nil, "HELPER2", missionInfo, baseDirectory)
-	cmNPCManager:loadNPC(nil, "HELPER3", missionInfo, baseDirectory)
-	cmNPCManager:loadNPC(nil, "HELPER4", missionInfo, baseDirectory)
+	for i = 1, 8 do
+		local npcName = "HELPER"..i
+		cmNPCManager:loadNPC(nil, npcName, missionInfo, baseDirectory)
+	end
 	for _, spot in pairs(g_npcManager.uniqueIdToSpot) do
 		spot:activate()
 	end
