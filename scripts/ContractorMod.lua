@@ -66,6 +66,7 @@ function ContractorMod:init()
 
     -- Try to load from savegame, else create default workers
     if not self:initFromSave() then
+      if not self:initFromParameters() then
         table.insert(ContractorMod.workers, ContractorModWorker:new("Alex", 1, g_localPlayer.graphicsComponent:getStyle()))
         local brendaStyle = g_helperManager:getRandomHelperStyle()
         while brendaStyle:getIsMale() do
@@ -78,6 +79,26 @@ function ContractorMod:init()
             davidStyle = g_helperManager:getRandomHelperStyle()
         end
         table.insert(ContractorMod.workers, ContractorModWorker:new("David", 4, davidStyle))
+        local edStyle = g_helperManager:getRandomHelperStyle()
+        while edStyle:getIsMale() == false do
+            edStyle = g_helperManager:getRandomHelperStyle()
+        end
+        table.insert(ContractorMod.workers, ContractorModWorker:new("Ed", 5, edStyle))
+        local franckStyle = g_helperManager:getRandomHelperStyle()
+        while franckStyle:getIsMale() == false do
+            franckStyle = g_helperManager:getRandomHelperStyle()
+        end
+        table.insert(ContractorMod.workers, ContractorModWorker:new("Franck", 6, franckStyle))
+        local garyStyle = g_helperManager:getRandomHelperStyle()
+        while garyStyle:getIsMale() == false do
+            garyStyle = g_helperManager:getRandomHelperStyle()
+        end
+        table.insert(ContractorMod.workers, ContractorModWorker:new("Gary", 7, garyStyle))
+        local henryStyle = g_helperManager:getRandomHelperStyle()
+        while henryStyle:getIsMale() == false do
+            henryStyle = g_helperManager:getRandomHelperStyle()
+        end
+        table.insert(ContractorMod.workers, ContractorModWorker:new("Henry", 8, henryStyle))
         ContractorMod.numWorkers = #ContractorMod.workers
         ContractorMod.displaySettings = {
             characterName = {
@@ -86,6 +107,7 @@ function ContractorMod:init()
                 size = 0.024
             }
         }
+      end
     end
     g_currentMission.nickname = ContractorMod.workers[ContractorMod.currentID].name
 end
@@ -131,55 +153,55 @@ end
 
 function ContractorMod:initFromSave()
   if ContractorMod.debug then print("ContractorMod:initFromSave()") end
-    -- Copy ContractorMod.xml from zip to modSettings dir
-    ContractorMod:CopyContractorModXML()
-    -- Minimal: load worker name, position, style from XML
-    if ContractorMod.savegameFolderPath and ContractorMod.ContractorModXmlFilePath then
-      createFolder(ContractorMod.savegameFolderPath)
-      local xml
-      if fileExists(ContractorMod.ContractorModXmlFilePath) then
-        xml = XMLFile.load('ContractorMod', ContractorMod.ContractorModXmlFilePath, ContractorMod.xmlSchema)
-      else
-        xml = XMLFile.create('ContractorMod', ContractorMod.ContractorModXmlFilePath, 'ContractorMod', ContractorMod.xmlSchema)
-        xml:save()
-        xml:delete()
-        return false
-      end
-      local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
-      for i = 1, num do
-          local key = string.format("ContractorMod.workers.worker(%d)", i-1)
-          local name = xml:getString(key.."#name")
-          local pos = xml:getString(key.."#position")
-          local yaw = xml:getString(key.."#yaw")
-          local style = PlayerStyle.new()
-          style:loadFromXMLFile(xml, key..".style")
-          local worker = ContractorModWorker:new(name, i, style)
-          if ContractorMod.debug then print(pos) end
-        local posVector = string.getVector(pos)
-        if ContractorMod.debug then print("posVector "..tostring(posVector)) end
-        local rotVector = string.getVector(rot)
-        worker.x = posVector[1]
-        worker.y = posVector[2]
-        worker.z = posVector[3]
-        worker.yaw = tonumber(yaw) or 0.0
-        local vehicleID = xml:getString(key.."#vehicleID")
-        if vehicleID ~= "0" then
-          if ContractorMod.mapVehicleLoad ~= nil then
-            -- map savegame vehicle id and network id
-            local saveId = ContractorMod.mapVehicleLoad[vehicleID]
-            local vehicle = NetworkUtil.getObject(tonumber(saveId))
-            if vehicle ~= nil then
-              if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
-              worker.currentVehicle = vehicle
-              local currentSeat = xml:getInt(key.."#currentSeat")
-              if currentSeat ~= nil then
-                worker.currentSeat = currentSeat
-              end
+  -- Copy ContractorMod.xml from zip to modSettings dir
+  ContractorMod:CopyContractorModXML()
+  -- Minimal: load worker name, position, style from XML
+  if ContractorMod.savegameFolderPath and ContractorMod.ContractorModXmlFilePath then
+    createFolder(ContractorMod.savegameFolderPath)
+    local xml
+    if fileExists(ContractorMod.ContractorModXmlFilePath) then
+      xml = XMLFile.load('ContractorMod', ContractorMod.ContractorModXmlFilePath, ContractorMod.xmlSchema)
+    else
+      xml = XMLFile.create('ContractorMod', ContractorMod.ContractorModXmlFilePath, 'ContractorMod', ContractorMod.xmlSchema)
+      xml:save()
+      xml:delete()
+      return false
+    end
+    local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
+    for i = 1, num do
+        local key = string.format("ContractorMod.workers.worker(%d)", i-1)
+        local name = xml:getString(key.."#name")
+        local pos = xml:getString(key.."#position")
+        local yaw = xml:getString(key.."#yaw")
+        local style = PlayerStyle.new()
+        style:loadFromXMLFile(xml, key..".style")
+        local worker = ContractorModWorker:new(name, i, style)
+        if ContractorMod.debug then print(pos) end
+      local posVector = string.getVector(pos)
+      if ContractorMod.debug then print("posVector "..tostring(posVector)) end
+      local rotVector = string.getVector(rot)
+      worker.x = posVector[1]
+      worker.y = posVector[2]
+      worker.z = posVector[3]
+      worker.yaw = tonumber(yaw) or 0.0
+      local vehicleID = xml:getString(key.."#vehicleID")
+      if vehicleID ~= "0" then
+        if ContractorMod.mapVehicleLoad ~= nil then
+          -- map savegame vehicle id and network id
+          local saveId = ContractorMod.mapVehicleLoad[vehicleID]
+          local vehicle = NetworkUtil.getObject(tonumber(saveId))
+          if vehicle ~= nil then
+            if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
+            worker.currentVehicle = vehicle
+            local currentSeat = xml:getInt(key.."#currentSeat")
+            if currentSeat ~= nil then
+              worker.currentSeat = currentSeat
             end
           end
         end
-        table.insert(ContractorMod.workers, worker)
-    end
+      end
+      table.insert(ContractorMod.workers, worker)
+  end
     xmlKey = "ContractorMod.displaySettings.characterName"
     ContractorMod.displaySettings = {}
     ContractorMod.displaySettings.characterName = {}
@@ -207,18 +229,77 @@ function ContractorMod:initFromSave()
   end
 end
 
+function ContractorMod:initFromParameters()
+  if ContractorMod.debug then print("ContractorMod:initFromParameters()") end
+  -- Copy ContractorMod.xml from zip to modSettings dir
+  ContractorMod:CopyContractorModXML()
+  if modSettingsDir then
+    local xmlFilePath = modSettingsDir .. "/ContractorMod.xml"
+    local xmlFile;
+    if fileExists(xmlFilePath) then
+      xml = XMLFile.load('ContractorMod', xmlFilePath, ContractorMod.xmlSchema)
+    else
+      return false
+    end
+    print("file exists")
+    local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
+    for i = 1, num do
+      local key = string.format("ContractorMod.workers.worker(%d)", i-1)
+      local name = xml:getString(key.."#name")
+      -- local pos = xml:getString(key.."#position")
+      -- local yaw = xml:getString(key.."#yaw")
+      local style = PlayerStyle.new()
+      style:loadFromXMLFile(xml, key..".style")
+      local worker = ContractorModWorker:new(name, i, style)
+      if ContractorMod.debug then print(pos) end
+      -- local posVector = string.getVector(pos)
+      -- if ContractorMod.debug then print("posVector "..tostring(posVector)) end
+      -- local rotVector = string.getVector(rot)
+      -- worker.x = posVector[1]
+      -- worker.y = posVector[2]
+      -- worker.z = posVector[3]
+      -- worker.yaw = tonumber(yaw) or 0.0
+      table.insert(ContractorMod.workers, worker)
+    end
+    xmlKey = "ContractorMod.displaySettings.characterName"
+    ContractorMod.displaySettings = {}
+    ContractorMod.displaySettings.characterName = {}
+    local x = xml:getFloat(xmlKey .. string.format("#x"))
+    if x == nil then
+      x = 0.9828
+    end
+    ContractorMod.displaySettings.characterName.x = x
+    local y = xml:getFloat(xmlKey .. string.format("#y"))
+    if y == nil then
+      y = 0.90
+    end
+    ContractorMod.displaySettings.characterName.y = y
+    local size = xml:getFloat(xmlKey .. string.format("#size"))
+    if size == nil then
+      size = 0.024
+    end
+    ContractorMod.displaySettings.characterName.size = size
+    xmlKey = "ContractorMod.displaySettings.playerName"
+    ContractorMod.displayPlayerNames = Utils.getNoNil(xml:getBool(xmlKey .. string.format("#displayPlayerNames")), true)
+    ContractorMod.enablePassenger = Utils.getNoNil(xml:getBool("ContractorMod.workers#enablePassenger"), false)
+    ContractorMod.numWorkers = #ContractorMod.workers
+    xml:delete()
+    return ContractorMod.numWorkers > 0
+  end
+  return false
+end
+
 -- @doc Copy default parameters from mod mod zip file to mods directory so end-user can edit it
 function ContractorMod:CopyContractorModXML()
   if ContractorMod.debug then print("ContractorMod:CopyContractorModXML") end
   if g_currentMission ~= nil and g_currentMission:getIsServer() then
-    if ContractorMod.myCurrentModDirectory then
-      local modSettingsDir = ContractorMod.myCurrentModDirectory .. "../../modSettings"
+    if modSettingsDir then
       local xmlFilePath = modSettingsDir.."/ContractorMod.xml"
       if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_1") end
       local xmlFile
       if not fileExists(xmlFilePath) then
         if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_2") end
-        local xmlSourceFilePath = ContractorMod.myCurrentModDirectory .. "ContractorMod.xml"
+        local xmlSourceFilePath = ContractorMod.modDirectory .. "/ContractorMod.xml"
         local xmlSourceFile
         if fileExists(xmlSourceFilePath) then
           if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_3") end
