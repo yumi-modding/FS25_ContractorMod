@@ -10,13 +10,21 @@ Mission00.onStartMission = Utils.appendedFunction(Mission00.onStartMission, func
       end
     end
     for i, worker in pairs(ContractorMod.workers) do
-      if i ~= 1 and worker.currentVehicle == nil then
-        local spot = NPCSpot.create(tostring(g_time), worker.npc, worker.x, worker.y, worker.z, 0, 0, 0, false) --g_npcManager:getAvailableSpot(npc)
-        spot:activate()
-        spot.isAvailable = true
-        -- spot.needsSaving = true
-        g_npcManager:addSpot(spot)
-        worker.npc:setSpot(spot)
+      if i ~= 1 then
+        if worker.currentVehicle == nil then
+          local spot = NPCSpot.create(tostring(g_time), worker.npc, worker.x, worker.y, worker.z, 0, 0, 0, false) --g_npcManager:getAvailableSpot(npc)
+          spot:activate()
+          spot.isAvailable = true
+          -- spot.needsSaving = true
+          g_npcManager:addSpot(spot)
+          worker.npc:setSpot(spot)
+        else
+          local currentVehicle = ContractorMod:getWorkerVehicle(worker)
+          if currentVehicle ~= nil then
+            print("Worker "..worker.name.." controlling vehicle")
+            currentVehicle:setVehicleCharacter(worker.playerStyle)
+          end
+        end
       end
     end
 end)
