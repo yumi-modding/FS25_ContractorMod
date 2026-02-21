@@ -39,7 +39,7 @@ function cmPlayer:drawUIInfo(superfunc)
 	if (ContractorMod.displayPlayerNames and not g_gui:getIsGuiVisible() and (not g_noHudModeEnabled and (g_gameSettings:getValue(GameSettings.SETTING.SHOW_MULTIPLAYER_NAMES) ))) then
         local x1, y1, z1 = getWorldTranslation(g_cameraManager:getActiveCamera())
         for i, worker in pairs(ContractorMod.workers) do
-            if ContractorMod:getWorkerVehicle(worker) == nil and worker.index ~= ContractorMod.currentWorkerId and worker.npc ~= nil then
+            if ContractorMod:getWorkerVehicle(worker) == nil and worker.index ~= ContractorMod.currentID and worker.npc ~= nil then
                 local x, y, z = getTranslation(worker.npc.playerGraphics.graphicsRootNode)
                 local diffX = x - x1
                 local diffY = y - y1
