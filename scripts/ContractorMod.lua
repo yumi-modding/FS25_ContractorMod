@@ -1,5 +1,5 @@
 ContractorMod = {}
-ContractorMod.debug = true --false --
+ContractorMod.debug = false --true --
 
 -- KO: Driver exists with passenger
 local modDirectory = g_currentModDirectory
