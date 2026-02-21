@@ -14,12 +14,9 @@ source(Utils.getFilename("scripts/cmWardrobeScreen.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/ContractorMod.lua", g_currentModDirectory))
 source(Utils.getFilename("scripts/ContractorModWorker.lua", g_currentModDirectory))
 -- source(Utils.getFilename("scripts/ContractorModTestRunner.lua", g_currentModDirectory))
-
 -- TODO:
--- Init from modSettings for new game instead of default values
--- Add option or replace Visit NPC with switch worker in Map view ["callback"] = self.onClickVisitPlace,
--- Prevent removing character when AIJob (like goto) done
 -- Using first person camera when driving can lead to activate passenger camera if any, then crash
+-- Test sell/repair vehicle with worker in it
 
 local contractormod
 

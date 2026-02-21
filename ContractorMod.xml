@@ -40,9 +40,9 @@
     <displaySettings>
         <!-- 
           You can change here the position and size of current character name displayed on screen
-          Default values used on FS17: x="0.9828" y="0.45" size="0.024"
+          Default values used on FS25: x="0.9828" y="0.915" size="0.024"
         -->
-        <characterName x="0.9828" y="0.90" size="0.024"/>
+        <characterName x="0.9828" y="0.915" size="0.024"/>
         <playerName displayPlayerNames="true"/>
     </displaySettings>
     <passengerSeats displayWarning="false">

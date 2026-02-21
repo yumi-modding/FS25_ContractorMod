@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="105">
+<modDesc descVersion="106">
   <author>yumi</author>
-  <version>0.1.0.7</version>
-  <contributors>yumi, mrbear, jujuokl, alpha117,FomaDNS</contributors>
+  <version>0.1.1.0</version>
   <title>
     <en>ContractorMod</en>
   </title>

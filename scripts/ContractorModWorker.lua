@@ -24,6 +24,7 @@ function ContractorModWorker:new(name, index, workerStyle)
   self.yaw = 0.0
   self.playerStyle = PlayerStyle.new()
   self.playerStyle:copyFrom(workerStyle)
+  self.active = true
   self.npc = g_npcManager:getNPCByName("HELPER" .. index)
   self.npc.playerGraphics:setIsFacialAnimationEnabled(false)
   self.npc.playerGraphics:setStyleAsync(workerStyle, self.npc.loadCharacterFinished, self.npc, {})
@@ -60,7 +61,7 @@ function ContractorModWorker:displayName(contractorMod)
   
   setTextColor(self.color[1], self.color[2], self.color[3], 1.0);
   local x = 0.9828
-  local y = 0.45
+  local y = 0.915
   local size = 0.024
   if contractorMod.displaySettings ~= nil and contractorMod.displaySettings.characterName ~= nil then
     x = contractorMod.displaySettings.characterName.x
@@ -190,4 +191,9 @@ function ContractorModWorker:setYawInstant(yaw)
 		-- ensure clients are updated
 		self.npc:raiseDirtyFlags(self.npc.dirtyFlag)
 	end
+end
+
+function ContractorModWorker:setActive(active)
+  if ContractorModWorker.debug then print("ContractorModWorker: set active "..tostring(active).." for "..self.name) end
+  self.active = active
 end

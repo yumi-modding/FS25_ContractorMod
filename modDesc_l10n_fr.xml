@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <text name="input_ContractorMod_NEXTWORKER" text="Activer le personnage suivant" />
+        <text name="input_ContractorMod_PREVWORKER" text="Activer le personnage précédent" />
+        <text name="input_ContractorMod_WORKER1" text="Activer le personnage 1" />
+        <text name="input_ContractorMod_WORKER2" text="Activer le personnage 2" />
+        <text name="input_ContractorMod_WORKER3" text="Activer le personnage 3" />
+        <text name="input_ContractorMod_WORKER4" text="Activer le personnage 4" />
+        <text name="input_ContractorMod_WORKER5" text="Activer le personnage 5" />
+        <text name="input_ContractorMod_WORKER6" text="Activer le personnage 6" />
+        <text name="input_ContractorMod_WORKER7" text="Activer le personnage 7" />
+        <text name="input_ContractorMod_WORKER8" text="Activer le personnage 8" />
+        <text name="ContractorMod_VEHICLE_NOT_FREE" text="Le véhicule est deja occupe par un autre personnage" />
+        <text name="ContractorMod_WORKER_STOP" text="Le véhicule va s'arreter si le personnage le quitte" />
+        <text name="ContractorMod_NO_MORE_PASSENGER" text="Il n'y a plus de place passager dans ce véhicule" />
+        <text name="ContractorMod_WORKER_INACTIVE" text="Ce personnage est actuellement inactif" />
+    </texts>
+</l10n>

@@ -149,6 +149,27 @@ function ContractorMod:getWorkerSeat(worker)
   end
   return worker.currentSeat
 end
+
+function ContractorMod:getWorkerFromNPC(npc)
+  if ContractorMod.debug then print("ContractorMod:getWorkerFromNPC()") end
+  if npc ~= nil then
+    if string.sub(npc.name, 1, 6) == "HELPER" and string.len(npc.name) > 6 then
+      local workerId = tonumber(string.sub(npc.name, 7))
+      if workerId ~= nil then
+        local worker = ContractorMod.workers[workerId]
+        if worker ~= nil then
+            return worker
+        else
+            print("Worker not found for id "..tostring(workerId))
+        end
+      else
+        print("Invalid worker id in npc name "..npc.name)
+      end
+    else
+      print("Not a worker npc "..npc.name)
+    end
+  end
+end
 -- ===== END ACCESSORS =====
 
 function ContractorMod:initFromSave()
@@ -327,26 +348,40 @@ end
 function ContractorMod:onSwitchWorker(action)
   if ContractorMod.debug then print("ContractorMod:onSwitchWorker()") end
   ContractorMod.switching = true
+  local canSwitch = false
+  local currentID = ContractorMod.currentID
   if action == "SWITCH_VEHICLE" then
     if ContractorMod.debug then print('ContractorMod_NEXTWORKER pressed') end
     local nextID = 0
     if ContractorMod.debug then print("ContractorMod: ContractorMod.currentID " .. tostring(ContractorMod.currentID)) end
-    if ContractorMod.currentID < ContractorMod.numWorkers then
-      nextID = ContractorMod.currentID + 1
-    else
-      nextID = 1
-    end
-    if ContractorMod.debug then print("ContractorMod: nextID " .. tostring(nextID)) end
-    self:setCurrentContractorModWorker(nextID)
+    repeat
+      if currentID < ContractorMod.numWorkers then
+        nextID = currentID + 1
+      else
+        nextID = 1
+      end
+      if ContractorMod.debug then print("ContractorMod: nextID " .. tostring(nextID)) end
+      canSwitch = self:setCurrentContractorModWorker(nextID)
+      if canSwitch == false then
+        g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_INFO, g_i18n:getText("ContractorMod_WORKER_INACTIVE") .. " (" .. ContractorMod.workers[nextID].name .. ")")
+      end
+      currentID = nextID
+    until canSwitch or nextID == ContractorMod.currentID
   elseif action == "SWITCH_VEHICLE_BACK" then
     if ContractorMod.debug then print('ContractorMod_PREVWORKER pressed') end
     local prevID = 0
-    if ContractorMod.currentID > 1 then
-      prevID = ContractorMod.currentID - 1
-    else
-      prevID = ContractorMod.numWorkers
-    end    
-    self:setCurrentContractorModWorker(prevID)
+    repeat
+      if currentID > 1 then
+        prevID = currentID - 1
+      else
+        prevID = ContractorMod.numWorkers
+      end    
+      canSwitch = self:setCurrentContractorModWorker(prevID)
+      if canSwitch == false then
+        g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_INFO, g_i18n:getText("ContractorMod_WORKER_INACTIVE") .. " (" .. ContractorMod.workers[prevID].name .. ")")
+      end
+      currentID = prevID
+    until canSwitch or prevID == ContractorMod.currentID
   end
 end
 
@@ -357,7 +392,9 @@ function ContractorMod:activateWorker(actionName, keyStatus)
   if string.sub(actionName, 1, 20) == "ContractorMod_WORKER" then
     local workerIndex = tonumber(string.sub(actionName, -1))
     if ContractorMod.numWorkers >= workerIndex and workerIndex ~= ContractorMod.currentID then
-      self:setCurrentContractorModWorker(workerIndex)
+      if self:setCurrentContractorModWorker(workerIndex) == false then
+        g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_CRITICAL, g_i18n:getText("ContractorMod_WORKER_INACTIVE") .. " (" .. ContractorMod.workers[workerIndex].name .. ")")
+      end
     end
   end
 end
@@ -365,6 +402,9 @@ end
 -- @doc Change active worker
 function ContractorMod:setCurrentContractorModWorker(setID)
   if ContractorMod.debug then print("ContractorMod:setCurrentContractorModWorker(setID) " .. tostring(setID) .. " - " .. tostring(ContractorMod.currentID)) end
+  if ContractorMod.workers[setID].active == false then
+    return false
+  end
   local currentWorker = ContractorMod.workers[ContractorMod.currentID]
   if currentWorker ~= nil then
     ContractorMod.shouldStopWorker = false
@@ -378,6 +418,7 @@ function ContractorMod:setCurrentContractorModWorker(setID)
     ContractorMod.shouldStopWorker = true
     ContractorMod.switching = false
   end
+  return true
   --DebugUtil.printTableRecursively(ContractorMod.workers, " ", 1, 3)
 end
 
