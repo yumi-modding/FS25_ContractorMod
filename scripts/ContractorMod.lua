@@ -454,6 +454,13 @@ function ContractorMod:isControlledByWorker(vehicle)
     for _, worker in pairs(ContractorMod.workers) do
       local currentVehicle = ContractorMod:getWorkerVehicle(worker)
       local seat = ContractorMod:getWorkerSeat(worker)
+      -- local name = nil
+      -- if currentVehicle ~= nil then
+      --   name = currentVehicle.getName and currentVehicle:getName() or tostring(currentVehicle)
+      -- else
+      --   name = "nil"    
+      -- end
+      -- print("Worker "..worker.name.." currentVehicle "..name.." seat "..tostring(seat))
       if currentVehicle ~= nil and vehicle ~= nil and currentVehicle == vehicle and seat == nil then
         return true
       end
@@ -461,6 +468,46 @@ function ContractorMod:isControlledByWorker(vehicle)
   end
   return false
 end
+
+function ContractorMod:manageSellConfigVehicle(vehicle)
+    if ContractorMod.debug then print("ContractorMod:manageSellConfigVehicle()") end
+    for _, worker in pairs(ContractorMod.workers) do
+        local currentVehicle = ContractorMod:getWorkerVehicle(worker)
+        if currentVehicle ~= nil and vehicle ~= nil and currentVehicle == vehicle then
+            worker.currentVehicle = nil
+            worker.currentSeat = nil
+            if vehicle ~= nil then
+                if vehicle.getExitNode == nil then
+                    return
+                else
+                    local exitPoint = vehicle:getExitNode(g_localPlayer)
+                    local x, y, z = getWorldTranslation(exitPoint)
+                    local terrainHeight = getTerrainHeightAtWorldPos(g_terrainNode, x, 0, z)
+                    local raycastLength = 2
+                    local _, _, colY, _ = RaycastUtil.raycastClosest(x, terrainHeight + 2, z, 0, -1, 0, 2, CollisionFlag.STATIC_OBJECT + CollisionFlag.ROAD)
+                    colY = colY or terrainHeight
+                    y = math.max(colY + 0.1, y)
+                    y = math.max(y, vehicle.waterY)
+                    worker.x = x
+                    worker.y = y
+                    worker.z = z
+                    local exitDirectionX, _, exitDirectionZ = localDirectionToWorld(exitPoint, 0, 0, 1)
+                    local exitYaw = MathUtil.getYRotationFromDirection(exitDirectionX, exitDirectionZ)
+                    worker.yaw = exitYaw
+                    if worker.index ~= ContractorMod.currentID then
+                        local spot = NPCSpot.create(tostring(g_time), worker.npc, worker.x, worker.y, worker.z, 0, 0, 0, false)
+                        spot:activate()
+                        spot.isAvailable = true
+                        g_npcManager:addSpot(spot)
+                        worker.npc:setSpot(spot)
+                        worker:setYawInstant(exitYaw)
+                    end
+                end
+            end
+        end
+    end
+end
+
 
 function ContractorMod:dumpWorkers()
   if ContractorMod.debug then print("ContractorMod:dumpWorkers()") end
