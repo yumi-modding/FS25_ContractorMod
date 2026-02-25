@@ -11,6 +11,9 @@
         <text name="input_ContractorMod_WORKER6" text="Switch to worker 6" />
         <text name="input_ContractorMod_WORKER7" text="Switch to worker 7" />
         <text name="input_ContractorMod_WORKER8" text="Switch to worker 8" />
+        <text name="action_ContractorMod_SWITCH" text="Switch to this worker" />
+        <text name="action_ContractorMod_DEACTIVATE" text="Deactivate this worker" />
+        <text name="action_ContractorMod_ACTIVATE" text="Activate this worker" />
         <text name="ContractorMod_VEHICLE_NOT_FREE" text="Vehicle is already controlled by another worker" />
         <text name="ContractorMod_WORKER_STOP" text="The vehicle will stop when leaving it" />
         <text name="ContractorMod_NO_MORE_PASSENGER" text="No more space for a passenger in this vehicle" />

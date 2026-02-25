@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
   <author>yumi</author>
-  <version>0.1.1.0</version>
+  <version>0.1.2.0</version>
   <title>
     <en>ContractorMod</en>
   </title>
@@ -21,7 +21,7 @@ They can be changed but by default they replaced the standard switch between veh
 
 This mod is compatible with CoursePlay and FollowMe mods.
 So, for example, when using FollowMe, one character will be the Leader and another one the Follower.
-Characters can be seen on the minimap when activating default category (the last one represented by a house) in the map overview screen.
+Characters can be seen on the minimap when activating default category (the last one represented by a house) in the map overview screen and you can also deactivate/activate characters from this view.
 
 TO FIX: Name, gender, color, body, hair, accessories and number of characters can be changed in ContractorMod.xml file located in modSettings directory for new games.
 Once a game has been saved, they can be changed in ContractorMod.xml file present in related savegame folder.
@@ -43,7 +43,7 @@ Die Belegung kann geändert werden, aber standardmäßig ersetzen sie den Switch
 
 Dieser Mod ist kompatibel mit CoursePlay und FollowMe.
 So wird zum Beispiel bei der Verwendung von FollowMe ein Charakter der Leader und ein weiterer der Follower sein.
-Charaktere können auf der Minikarte gesehen werden, wenn die Standardkategorie (die letzte durch ein Haus repräsentiert) im Kartenübersichtsbildschirm aktiviert wird.
+Charaktere können auf der Minikarte gesehen werden, wenn die Standardkategorie (die letzte durch ein Haus repräsentiert) im Kartenübersichtsbildschirm aktiviert wird und Sie können die Charaktere auch von dieser Ansicht aus deaktivieren/aktivieren.
 
 Name, Geschlecht, Farbe, Körper, Haar, Accessoires und Anzahl der Zeichen können in der ContractorMod.xml Datei im Ordner modSettings für neue Spiele geändert werden.
 Sobald ein Spiel gespeichert wurde, kann es in der Datei ContractorMod.xml geändert werden, die im zugehörigen Spielstandsordner vorhanden ist.
@@ -64,7 +64,7 @@ Ces touches peuvent être personnalisées et remplacent le switch standard de v�
 
 Ce mod est compatible avec les mods CoursePlay et FollowMe.
 Ainsi, en mode FollowMe par exemple, un perso sera le Leader et un autre perso le Follower.
-Les perso sont visibles sur la minimap lorsque la catégorie par défaut (la dernière représentée par une maison) est activée dans la vue Aperçu de la carte.
+Les perso sont visibles sur la minimap lorsque la catégorie par défaut (la dernière représentée par une maison) est activée dans la vue Aperçu de la carte et vous pouvez désactiver/activer les personnages depuis cette vue.
 
 Le nom, le genre, la couleur, le corps, les cheveux, les accessoires et le nombre de perso peuvent être modifiés dans le fichier ContractorMod.xml situé dans le dossier modSettings pour les nouvelles parties.
 Une fois la partie sauvegardée, les modifications se font dans le fichier ContractorMod.xml du répertoire de sauvegarde habituel (savegame..).
@@ -85,7 +85,7 @@ Eles podem ser alterados, mas, por padrão, eles substituíram o interruptor pad
 
 Este mod é compatível com os mods CoursePlay e FollowMe.
 Assim, por exemplo, ao usar o FollowMe, um personagem será o Líder e outro o Seguidor.
-Os personagens podem ser vistos no minimapa ao ativar a categoria padrão (a última representada por uma casa) na tela de visão geral do mapa.
+Os personagens podem ser vistos no minimapa ao ativar a categoria padrão (a última representada por uma casa) na tela de visão geral do mapa e você também pode desativar/ativar os personagens a partir desta visualização.
 
 Nome, sexo, cor, corpo, cabelo, acessórios e número de personagens podem ser alterados no arquivo ContractorMod.xml para novos jogos.
 Uma vez que um jogo tenha sido salvo, ele pode ser alterado no arquivo ContractorMod.xml, presente na pasta relacionada do savegame.
