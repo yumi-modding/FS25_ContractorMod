@@ -318,9 +318,9 @@ function ContractorMod:CopyContractorModXML()
       local xmlFilePath = modSettingsDir.."/ContractorMod.xml"
       if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_1") end
       local xmlFile
-      if not fileExists(xmlFilePath) then
+      if not fileExists(xmlFilePath) and modDirectory then
         if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_2") end
-        local xmlSourceFilePath = ContractorMod.modDirectory .. "/ContractorMod.xml"
+        local xmlSourceFilePath = modDirectory .. "/ContractorMod.xml"
         local xmlSourceFile
         if fileExists(xmlSourceFilePath) then
           if ContractorMod.debug then print("ContractorMod:CopyContractorModXML_3") end
