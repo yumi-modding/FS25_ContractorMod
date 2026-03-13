@@ -1,5 +1,5 @@
 
--- @doc Will call dedicated save method
+-- Save ContractorMod workers data
 SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.onSaveComplete, function(self)
   if ContractorMod.debug then print("cmSavegameController:pre_onSaveComplete") end
   if ContractorMod.workers ~= nil then
@@ -32,6 +32,9 @@ SavegameController.onSaveComplete = Utils.prependedFunction(SavegameController.o
           vehicleID = worker.saveId
         end
         xmlFile:setString(key.."#vehicleID", Utils.getNoNil(vehicleID, "0"))
+        if worker.currentSeat ~= nil then
+          xmlFile:setString(key.."#currentSeat", Utils.getNoNil(worker.currentSeat, "0"))
+        end
       end
       local xmlKey = rootXmlKey .. ".displaySettings.characterName"
       xmlFile:setFloat(xmlKey .. "#x", ContractorMod.displaySettings.characterName.x)
