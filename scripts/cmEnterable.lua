@@ -1,6 +1,6 @@
 cmEnterable = {}
 
--- @doc Set mapping between savegame vehicle id and vehicle network id when vehicle is loaded
+-- Set mapping between savegame vehicle id and vehicle network id when vehicle is loaded
 cmEnterable.app_OnLoad = function(self, savegame)
   if ContractorMod.debug then print("cmEnterable.app_OnLoad") end
   if savegame ~= nil then
@@ -19,9 +19,11 @@ cmEnterable.app_OnLoad = function(self, savegame)
 end
 Enterable.onLoad = Utils.appendedFunction(Enterable.onLoad, cmEnterable.app_OnLoad)
 
--- @doc Prevent from removing driver character when leaving vehicle if switching between workers
+-- Prevent from removing driver character when leaving vehicle if switching between workers
 function cmEnterable:getDisableVehicleCharacterOnLeave(superfunc)
   if ContractorMod.debug then print("cmEnterable:getDisableVehicleCharacterOnLeave", ContractorMod.workers[ContractorMod.currentID].currentSeat) end
+  
+    -- print(string.format("getDisableVehicleCharacterOnLeave active camera %s", tostring(self.spec_enterable.activeCamera)))
   if ContractorMod.switching then
     -- ContractorMod.switching = false
     if ContractorMod.debug then print("switching return false") end
@@ -49,6 +51,8 @@ Enterable.restoreVehicleCharacter = Utils.overwrittenFunction(Enterable.restoreV
 -- Keep current worker character when activating AIJob helper, prevent to set random character
 function cmEnterable:setRandomVehicleCharacter(superfunc, helper)
   if ContractorMod.debug then print("cmEnterable:setRandomVehicleCharacter") end
+  
+    -- print(string.format("setRandomVehicleCharacter active camera %s", tostring(self.spec_enterable.activeCamera)))
   return
 end
 Enterable.setRandomVehicleCharacter = Utils.overwrittenFunction(Enterable.setRandomVehicleCharacter, cmEnterable.setRandomVehicleCharacter)
@@ -74,13 +78,55 @@ end
 -- Enterable.getIsControlled = Utils.overwrittenFunction(Enterable.getIsControlled, cmEnterable.getIsControlled)
 -- Lead to vehicle always controlled, running by themselves
 
--- 
+-- Prevent to allow entering as driver when worker already there
 function cmEnterable:getIsInteractive(superfunc, superFunc)
   -- if ContractorMod.debug then print("cmEnterable:getIsInteractive") end
-  -- Prevent to allow entering as driver
-  if ContractorMod:isControlledByWorker(self) then
+  local isInteractive = superFunc(self)
+  if not isInteractive then
     return false
   end
-  return superfunc(self, superFunc)
+  -- Prevent to allow entering as driver
+  if ContractorMod:isControlledByWorker(self) then
+    -- if ContractorMod.debug then print("cmEnterable:getIsInteractive: false") end
+    return false
+  end
+  return true
 end
 Enterable.getIsInteractive = Utils.overwrittenFunction(Enterable.getIsInteractive, cmEnterable.getIsInteractive)
+
+-- OK  no more crash but vehicle blocked by ghost worker
+function cmEnterable:onPostUpdate(superfunc,dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
+	local spec = self.spec_enterable
+	if self.isClient then
+		if spec.isEntered and (spec.vehicleCharacter ~= nil and (spec.vehicleCharacter.characterSpineNode ~= nil and spec.vehicleCharacter.characterSpineSpeedDepended)) then
+			spec.vehicleCharacter:setSpineDirty(self.lastSpeedAcceleration)
+		end
+		if self.finishedFirstUpdate then
+			if self:getIsEntered() then
+				if spec.activeCamera ~= nil then
+					spec.activeCamera:update(dt)
+        else
+          print("cmEnterable:onPostUpdate: preventing crash")
+				end
+			end
+			if self:getAllowCharacterVisibilityUpdate() and spec.vehicleCharacter ~= nil then
+				spec.vehicleCharacter:updateVisibility()
+			end
+		end
+		if self:getIsControlled() then
+			if spec.vehicleCharacter ~= nil then
+				spec.vehicleCharacter:update(dt)
+			end
+			if spec.activeCamera ~= nil then
+				if spec.activeCamera.useMirror then
+					self:setMirrorVisible(true)
+				else
+					return
+				end
+			end
+		else
+			return
+		end
+	end
+end
+-- Enterable.onPostUpdate = Utils.overwrittenFunction(Enterable.onPostUpdate, cmEnterable.onPostUpdate)
