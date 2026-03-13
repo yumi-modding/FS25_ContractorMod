@@ -144,7 +144,7 @@ function ContractorMod:getWorkerSeat(worker)
   if worker.index == ContractorMod.currentID and g_localPlayer ~= nil then
     local vehicle = g_localPlayer:getCurrentVehicle()
     if vehicle and vehicle.spec_enterable then
-      return vehicle.spec_enterable.playerSeat or worker.currentSeat
+      return worker.currentSeat
     end
   end
   return worker.currentSeat
@@ -198,31 +198,31 @@ function ContractorMod:initFromSave()
         style:loadFromXMLFile(xml, key..".style")
         local worker = ContractorModWorker:new(name, i, style)
         if ContractorMod.debug then print(pos) end
-      local posVector = string.getVector(pos)
-      if ContractorMod.debug then print("posVector "..tostring(posVector)) end
-      local rotVector = string.getVector(rot)
-      worker.x = posVector[1]
-      worker.y = posVector[2]
-      worker.z = posVector[3]
-      worker.yaw = tonumber(yaw) or 0.0
-      local vehicleID = xml:getString(key.."#vehicleID")
-      if vehicleID ~= "0" then
-        if ContractorMod.mapVehicleLoad ~= nil then
-          -- map savegame vehicle id and network id
-          local saveId = ContractorMod.mapVehicleLoad[vehicleID]
-          local vehicle = NetworkUtil.getObject(tonumber(saveId))
-          if vehicle ~= nil then
-            if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
-            worker.currentVehicle = vehicle
-            local currentSeat = xml:getInt(key.."#currentSeat")
-            if currentSeat ~= nil then
-              worker.currentSeat = currentSeat
+        local posVector = string.getVector(pos)
+        if ContractorMod.debug then print("posVector "..tostring(posVector)) end
+        local rotVector = string.getVector(rot)
+        worker.x = posVector[1]
+        worker.y = posVector[2]
+        worker.z = posVector[3]
+        worker.yaw = tonumber(yaw) or 0.0
+        local vehicleID = xml:getString(key.."#vehicleID")
+        if vehicleID ~= "0" then
+          if ContractorMod.mapVehicleLoad ~= nil then
+            -- map savegame vehicle id and network id
+            local saveId = ContractorMod.mapVehicleLoad[vehicleID]
+            local vehicle = NetworkUtil.getObject(tonumber(saveId))
+            if vehicle ~= nil then
+              if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
+              worker.currentVehicle = vehicle
+              local currentSeat = xml:getInt(key.."#currentSeat")
+              if currentSeat ~= nil then
+                worker.currentSeat = currentSeat
+              end
             end
           end
         end
-      end
-      table.insert(ContractorMod.workers, worker)
-  end
+        table.insert(ContractorMod.workers, worker)
+    end
     xmlKey = "ContractorMod.displaySettings.characterName"
     ContractorMod.displaySettings = {}
     ContractorMod.displaySettings.characterName = {}
@@ -462,11 +462,59 @@ function ContractorMod:isControlledByWorker(vehicle)
       -- end
       -- print("Worker "..worker.name.." currentVehicle "..name.." seat "..tostring(seat))
       if currentVehicle ~= nil and vehicle ~= nil and currentVehicle == vehicle and seat == nil then
+        -- A worker is driving this vehicle
+        -- printCallstack()
+        -- print("Worker "..worker.name.." is already driving ".. (currentVehicle.getName and currentVehicle:getName() or tostring(currentVehicle)))
         return true
       end
     end
   end
   return false
+end
+
+function ContractorMod:getFirstFreeSeat(vehicle)
+  local spec = vehicle.spec_enterablePassenger
+  if not spec or not spec.passengerSeats then
+    -- print("Vehicle "..(vehicle.getName and vehicle:getName() or tostring(vehicle)).." does not have passenger seats")
+    return 0
+  end
+  
+  local totalSeats = #spec.passengerSeats
+  local occupiedSeats = {}
+
+  -- Collect which seat indices are occupied
+  for _, worker in pairs(ContractorMod.workers) do
+    local currentVehicle = ContractorMod:getWorkerVehicle(worker)
+    if currentVehicle == vehicle and worker.currentSeat ~= nil then
+      occupiedSeats[worker.currentSeat] = true
+    end
+  end
+  
+  -- Find first available seat
+  for seatIndex = 1, totalSeats do
+    if not occupiedSeats[seatIndex] then
+      -- print("First free seat index: " .. seatIndex)
+      return seatIndex
+    end
+  end
+  -- print("No free seats available")
+  -- No seats available
+  return 0
+end
+
+function ContractorMod:hasDriver(vehicle)
+  local hasDriver = false
+  if vehicle ~= nil then
+    for _, worker in pairs(ContractorMod.workers) do
+      local currentVehicle = ContractorMod:getWorkerVehicle(worker)
+      if currentVehicle ~= nil and currentVehicle == vehicle and worker.currentSeat == nil then
+        -- Driver found for this vehicle
+        hasDriver = true
+        break
+      end
+    end
+  end
+  return hasDriver
 end
 
 function ContractorMod:manageSellConfigVehicle(vehicle)
@@ -512,7 +560,18 @@ end
 function ContractorMod:dumpWorkers()
   if ContractorMod.debug then print("ContractorMod:dumpWorkers()") end
   if ContractorMod.workers ~= nil then
-    DebugUtil.printTableRecursively(ContractorMod.workers, "  ", 1, 2)
+    for _, worker in pairs(ContractorMod.workers) do
+      DebugUtil.printTableRecursively(worker, "  ", 1, 1)
+      local vehicle = ContractorMod:getWorkerVehicle(worker)
+      local seat = ContractorMod:getWorkerSeat(worker)
+      local name = nil
+      if vehicle ~= nil then
+        name = vehicle.getName and vehicle:getName() or tostring(vehicle)
+      else
+        name = "nil"    
+      end
+      print("Worker "..worker.name.." currentVehicle "..name.." seat "..tostring(seat))
+    end
   end
 end
 addConsoleCommand("cmDumpWorkers", "Dump ContractorMod workers for debug", "dumpWorkers", ContractorMod)
