@@ -1,7 +1,9 @@
 cmPlayer = {}
 
 function cmPlayer:onLeaveVehicle(superfunc, vehicle, noEventSend)
-    if ContractorMod.debug then print("cmPlayer.onLeaveVehicle") end
+    if ContractorMod.debug then 
+        print(string.format("cmPlayer.onLeaveVehicle vehicle=%s", vehicle and (vehicle.getName and vehicle:getName() or tostring(vehicle)) or "nil")) 
+    end
     local currentVehicle = g_localPlayer:getCurrentVehicle()
     if currentVehicle then
         cmPlayer:ManageLeaveVehicle(currentVehicle)
@@ -10,12 +12,13 @@ function cmPlayer:onLeaveVehicle(superfunc, vehicle, noEventSend)
 end
 Player.leaveVehicle = Utils.overwrittenFunction(Player.leaveVehicle, cmPlayer.onLeaveVehicle)
 
--- @doc Make some checks before leaving a vehicle to manage passengers and hired worker
+-- Stop AIJob when leaving vehicle with worker as driver in it
 function cmPlayer:ManageLeaveVehicle(controlledVehicle)
     if ContractorMod.debug then print("cmPlayer:ManageLeaveVehicle") end
     
     if controlledVehicle ~= nil then
-        if ContractorMod.shouldStopWorker then
+        local currentWorker = ContractorMod.workers[ContractorMod.currentID]
+        if ContractorMod.shouldStopWorker and currentWorker.currentSeat == nil then
             if controlledVehicle:getIsAIActive() then
                 g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_INFO, g_i18n:getText("ContractorMod_WORKER_STOP"))
                 controlledVehicle:stopCurrentAIJob(AIMessageSuccessStoppedByUser.new())
@@ -25,16 +28,17 @@ function cmPlayer:ManageLeaveVehicle(controlledVehicle)
 
 end
 
+-- Prevent to teleport to exit point when switching between workers
 function cmPlayer:teleportToExitPoint(superfunc, vehicle, noEventSend)
     if ContractorMod.debug then print("cmPlayer:teleportToExitPoint") end
     -- printCallstack()
-    -- Prevent to teleport to exit point when switching between workers
     if not ContractorMod.switching then
         superfunc(self, vehicle, noEventSend)
     end
 end
 Player.teleportToExitPoint = Utils.overwrittenFunction(Player.teleportToExitPoint, cmPlayer.teleportToExitPoint)
 
+-- Draw worker name above head when not in vehicle
 function cmPlayer:drawUIInfo(superfunc)
 	if (ContractorMod.displayPlayerNames and not g_gui:getIsGuiVisible() and (not g_noHudModeEnabled and (g_gameSettings:getValue(GameSettings.SETTING.SHOW_MULTIPLAYER_NAMES) ))) then
         local x1, y1, z1 = getWorldTranslation(g_cameraManager:getActiveCamera())
@@ -53,3 +57,9 @@ function cmPlayer:drawUIInfo(superfunc)
 	end
 end
 Player.drawUIInfo = Utils.appendedFunction(Player.drawUIInfo, cmPlayer.drawUIInfo)
+
+-- Prevent to spawn vehicle on mission start
+function cmPlayer:getHasSpawnVehicle(superfunc)
+	return false
+end
+Player.getHasSpawnVehicle = Utils.overwrittenFunction(Player.getHasSpawnVehicle, cmPlayer.getHasSpawnVehicle)
