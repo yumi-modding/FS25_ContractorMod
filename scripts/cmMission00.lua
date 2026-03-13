@@ -21,12 +21,18 @@ Mission00.onStartMission = Utils.appendedFunction(Mission00.onStartMission, func
         else
           local currentVehicle = ContractorMod:getWorkerVehicle(worker)
           if currentVehicle ~= nil then
-            print("Worker "..worker.name.." controlling vehicle")
-            currentVehicle:setVehicleCharacter(worker.playerStyle)
+            if worker.currentSeat ~= nil then
+              print("Worker "..worker.name.." passenger in vehicle")
+              currentVehicle:setPassengerSeatCharacter(worker.currentSeat, worker.playerStyle)
+            else
+              print("Worker "..worker.name.." controlling vehicle")
+              currentVehicle:setVehicleCharacter(worker.playerStyle)
+            end
           end
         end
       end
     end
+    -- DebugUtil.printTableRecursively(ContractorMod.workers, " ", 1, 3) 
 end)
 
 -- Display a warning message in the log when loading savegame
