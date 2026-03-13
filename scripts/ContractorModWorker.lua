@@ -71,7 +71,7 @@ function ContractorModWorker:displayName(contractorMod)
   renderText(x, y, size, self.name);
   
   if ContractorModWorker.debug then
-    local currentVehicle = ContractorModWor:getWorkerVehicle(self)
+    local currentVehicle = ContractorMod:getWorkerVehicle(self)
     if currentVehicle ~= nil then
       local vehicleName = ""
       vehicleName = currentVehicle:getFullName()
@@ -98,39 +98,44 @@ function ContractorModWorker:beforeSwitch(noEventSend)
   self.currentVehicle = g_localPlayer:getCurrentVehicle()
 
   if self.currentVehicle == nil then
-    -- Old passenger condition
-    local passengerHoldingVehicle = g_currentMission.passengerHoldingVehicle;
-    if passengerHoldingVehicle ~= nil then
-      -- source worker is passenger in a vehicle
-    else
-      -- source worker is not in a vehicle
-      local x, y, z = g_localPlayer:getPosition()
-      local distance = MathUtil.vector3Length(self.x - x, self.y - y, self.z - z)
-      -- print("ContractorModWorker: beforeSwitch distance "..tostring(distance))
-      self.x, self.y, self.z, self.rotY = g_localPlayer:getPosition()
-      self.yaw = g_localPlayer:getGraphicalYaw()
-      if ContractorModWorker.debug then print(string.format("ContractorModWorker:beforeSwitch not in vehicle %d,%d,%d | %d", self.x, self.y, self.z, self.yaw)) end
+    self.currentSeat = nil
+    -- source worker is not in a vehicle
+    local x, y, z = g_localPlayer:getPosition()
+    local distance = MathUtil.vector3Length(self.x - x, self.y - y, self.z - z)
+    -- print("ContractorModWorker: beforeSwitch distance "..tostring(distance))
+    self.x, self.y, self.z, self.rotY = g_localPlayer:getPosition()
+    self.yaw = g_localPlayer:getGraphicalYaw()
+    if ContractorModWorker.debug then print(string.format("ContractorModWorker:beforeSwitch not in vehicle %d,%d,%d | %d", self.x, self.y, self.z, self.yaw)) end
 
-      local spot = NPCSpot.create(tostring(g_time), self.npc, self.x, self.y, self.z, 0, 0, 0, false) --g_npcManager:getAvailableSpot(npc)
-      spot:activate()
-      spot.isAvailable = true
-      -- spot.needsSaving = true
-      g_npcManager:addSpot(spot)
-      
-      self.npc:setSpot(spot)
-      self:setYawInstant(g_localPlayer:getGraphicalYaw())
-    end
+    local spot = NPCSpot.create(tostring(g_time), self.npc, self.x, self.y, self.z, 0, 0, 0, false) --g_npcManager:getAvailableSpot(npc)
+    spot:activate()
+    spot.isAvailable = true
+    -- spot.needsSaving = true
+    g_npcManager:addSpot(spot)
+    
+    self.npc:setSpot(spot)
+    self:setYawInstant(g_localPlayer:getGraphicalYaw())
   else
     -- source worker is in a vehicle
     self.x, self.y, self.z = getWorldTranslation(self.currentVehicle.rootNode)
     self.y = self.y + 2 --to avoid being under the ground
     local dx, _, dz = localDirectionToWorld(self.currentVehicle.rootNode, 0, 0, 1)
     self.yaw = MathUtil.getYRotationFromDirection(dx, dz) or 0.0
-    print("self.currentSeat", self.currentSeat)
+    print(string.format("self.currentSeat=%s", self.currentSeat))
 
-    if noEventSend == nil or noEventSend == false then
-      if ContractorModWorker.debug then print(string.format("ContractorModWorker: sendEvent(onLeaveVehicle %d, %d, %d", self.x, self.y, self.z)) end
-      g_localPlayer:leaveVehicle()
+    if self.currentSeat ~= nil then
+      -- source worker is passenger in a vehicle
+      if noEventSend == nil or noEventSend == false then
+        if ContractorModWorker.debug then print(string.format("ContractorModWorker: sendEvent(leaveVehicle passenger seat %d)", self.currentSeat)) end
+        self.currentVehicle:leavePassengerSeat(true, self.currentSeat)
+				g_localPlayer:onLeaveVehicleAsPassenger(self.currentVehicle)
+      end
+    else
+      -- source worker is driving in a vehicle
+      if noEventSend == nil or noEventSend == false then
+        if ContractorModWorker.debug then print(string.format("ContractorModWorker: sendEvent(onLeaveVehicle %d, %d, %d", self.x, self.y, self.z)) end
+        g_localPlayer:leaveVehicle(self.currentVehicle)
+      end
     end
   end
 end
@@ -164,11 +169,12 @@ function ContractorModWorker:afterSwitch(noEventSend)
     end
 
   else
-    if self.currentSeat ~= nil then
-      -- target worker is passenger
+    if self.currentSeat ~= nil and self.currentVehicle ~= nil then
+      -- g_localPlayer:requestToEnterVehicle(self.currentVehicle) Fix the issue but then twice worker in the vehicle as driver & passenger
+      -- target worker is passenger in a vehicle
       self.currentVehicle:enterVehiclePassengerSeat(true, self.currentSeat, self.playerStyle, g_localPlayer.userId)
     else
-      -- target worker is in a vehicle
+      -- target worker is driving in a vehicle
       if noEventSend == nil or noEventSend == false then
         if ContractorModWorker.debug then print("ContractorModWorker: sendEvent(VehicleEnterRequestEvent:" ) end
         -- g_client:getServerConnection():sendEvent(VehicleEnterRequestEvent.new(self.currentVehicle, self.playerStyle, self.farmId));
