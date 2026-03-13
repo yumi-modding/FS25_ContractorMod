@@ -18,5 +18,6 @@
         <text name="ContractorMod_WORKER_STOP" text= "El vehículo se detendrá al bajarse" />
         <text name="ContractorMod_NO_MORE_PASSENGER" text="No hay espacio para un pasajero más en este vehículo" />
         <text name="ContractorMod_WORKER_INACTIVE" text="Este jornalero está actualmente inactivo" />
+        <text name="ContractorMod_SEAT_SWITCH_DISABLED" text="Cambiar de asiento está deshabilitado con ContractorMod" />
     </texts>
 </l10n>

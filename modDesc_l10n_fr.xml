@@ -18,5 +18,6 @@
         <text name="ContractorMod_WORKER_STOP" text="Le véhicule va s'arreter si le personnage le quitte" />
         <text name="ContractorMod_NO_MORE_PASSENGER" text="Il n'y a plus de place passager dans ce véhicule" />
         <text name="ContractorMod_WORKER_INACTIVE" text="Ce personnage est actuellement inactif" />
+        <text name="ContractorMod_SEAT_SWITCH_DISABLED" text="Le changement de siège est désactivé avec ContractorMod" />
     </texts>
 </l10n>

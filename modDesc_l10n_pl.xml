@@ -18,5 +18,6 @@
         <text name="ContractorMod_WORKER_STOP" text="Pojazd zatrzyma się, gdy go opuścisz" />
         <text name="ContractorMod_NO_MORE_PASSENGER" text="Brak więcej miejsca dla pasażera w tym pojeździe" />
         <text name="ContractorMod_WORKER_INACTIVE" text="Ten pracownik jest obecnie nieaktywny" />
+        <text name="ContractorMod_SEAT_SWITCH_DISABLED" text="Zmiana siedzenia jest wyłączona z ContractorMod" />
     </texts>
 </l10n>
