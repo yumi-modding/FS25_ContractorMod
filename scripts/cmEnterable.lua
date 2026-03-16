@@ -94,6 +94,22 @@ function cmEnterable:getIsInteractive(superfunc, superFunc)
 end
 Enterable.getIsInteractive = Utils.overwrittenFunction(Enterable.getIsInteractive, cmEnterable.getIsInteractive)
 
+
+function cmEnterable:getIsEnterableFromMenu(superfunc)
+	local isEnterableFromMenu = superfunc(self)
+  if not isEnterableFromMenu then
+    return false
+  end
+  -- Prevent to allow entering as driver from menu if vehicle already controlled by worker
+  if ContractorMod:isControlledByWorker(self) then
+    return false
+  end
+  return true
+end
+Enterable.getIsEnterableFromMenu = Utils.overwrittenFunction(Enterable.getIsEnterableFromMenu, cmEnterable.getIsEnterableFromMenu)
+
+
+
 -- OK  no more crash but vehicle blocked by ghost worker
 function cmEnterable:onPostUpdate(superfunc,dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
 	local spec = self.spec_enterable
