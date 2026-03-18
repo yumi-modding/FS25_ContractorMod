@@ -27,6 +27,9 @@ Mission00.onStartMission = Utils.appendedFunction(Mission00.onStartMission, func
             else
               print("Worker "..worker.name.." controlling vehicle")
               currentVehicle:setVehicleCharacter(worker.playerStyle)
+              if currentVehicle.mapHotspot ~= nil then
+                currentVehicle.mapHotspot:setColor(unpack(worker.color))
+              end
             end
           end
         end
