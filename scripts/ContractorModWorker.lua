@@ -135,6 +135,9 @@ function ContractorModWorker:beforeSwitch(noEventSend)
       if noEventSend == nil or noEventSend == false then
         if ContractorModWorker.debug then print(string.format("ContractorModWorker: sendEvent(onLeaveVehicle %d, %d, %d", self.x, self.y, self.z)) end
         g_localPlayer:leaveVehicle(self.currentVehicle)
+        if self.currentVehicle.mapHotspot ~= nil then
+          self.currentVehicle.mapHotspot:setColor(unpack(self.color))
+        end
       end
     end
   end
@@ -169,16 +172,29 @@ function ContractorModWorker:afterSwitch(noEventSend)
     end
 
   else
-    if self.currentSeat ~= nil and self.currentVehicle ~= nil then
+    --print(string.format("Current seat: %s Vehicle: %s Has driver: %s", self.currentSeat, self.currentVehicle:getFullName(), tostring(ContractorMod:hasDriver(self.currentVehicle))))
+    if self.currentSeat ~= nil and self.currentVehicle ~= nil  and ContractorMod:hasDriver(self.currentVehicle) then
       -- g_localPlayer:requestToEnterVehicle(self.currentVehicle) Fix the issue but then twice worker in the vehicle as driver & passenger
       -- target worker is passenger in a vehicle
       self.currentVehicle:enterVehiclePassengerSeat(true, self.currentSeat, self.playerStyle, g_localPlayer.userId)
+      -- Keep player state machine in sync with direct passenger seat entry.
+      g_localPlayer:onEnterVehicleAsPassenger(self.currentVehicle, self.currentSeat)
     else
       -- target worker is driving in a vehicle
       if noEventSend == nil or noEventSend == false then
         if ContractorModWorker.debug then print("ContractorModWorker: sendEvent(VehicleEnterRequestEvent:" ) end
         -- g_client:getServerConnection():sendEvent(VehicleEnterRequestEvent.new(self.currentVehicle, self.playerStyle, self.farmId));
         g_localPlayer:requestToEnterVehicle(self.currentVehicle)
+        if self.currentSeat ~= nil then
+          -- Force removing passenger character since passenger becomes driver
+          ContractorMod.switching = false
+          self.currentVehicle:setPassengerSeatCharacter(self.currentSeat, nil)
+          ContractorMod.switching = true
+          self.currentSeat = nil
+        end
+        if self.currentVehicle.mapHotspot ~= nil then
+          self.currentVehicle.mapHotspot:setColor(unpack(self.color))
+        end
         if ContractorModWorker.debug then print("ContractorModWorker: playerStyle "..tostring(self.playerStyle)) end
       end
     end
