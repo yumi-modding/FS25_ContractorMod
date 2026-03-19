@@ -62,7 +62,7 @@ function cmEnterable:onPlayerStyleChanged(superfunc,style, userId)
   if ContractorMod.debug then print("cmEnterable:onPlayerStyleChanged") end
   for _, worker in pairs(ContractorMod.workers) do
     local currentVehicle = ContractorMod:getWorkerVehicle(worker)
-    if currentVehicle ~= nil and currentVehicle == self then
+    if currentVehicle ~= nil and currentVehicle == self and worker.currentSeat == nil then
       -- print("Worker "..worker.name.." style changed, update seat character")
       -- printCallstack()
       superfunc(self, worker.playerStyle, userId)
