@@ -21,24 +21,31 @@ end
 EnterablePassenger.onLoad = Utils.overwrittenFunction(EnterablePassenger.onLoad, cmEnterablePassenger.onLoad)
 
 -- Value worker.currentSeat when entering/exiting as passenger to keep track of occupied seats
--- TODO: Leaving passenger don't leave vehicle leading to crash just after
 function cmEnterablePassenger:setPassengerSeatCharacter(superfunc, seatIndex, playerStyle)
     if ContractorMod.debug then print(string.format("cmEnterablePassenger:setPassengerSeatCharacter seatIndex=%s playerStyle=%s", tostring(seatIndex), tostring(playerStyle))) end
     if ContractorMod.switching and playerStyle == nil then
         if ContractorMod.debug then print("switching from passenger so keep passenger seat character") end
+        local workerPlayerStyle = nil
+        for _, worker in pairs(ContractorMod.workers) do
+            if worker.currentSeat == seatIndex and ContractorMod:getWorkerVehicle(worker) == self then
+                workerPlayerStyle = worker.playerStyle
+                break
+            end
+        end
+        -- Force setting character to prevent it disappear
+        superfunc(self, seatIndex, workerPlayerStyle)
     else
         if ContractorMod.debug then print("not switching or switching to passenger so set passenger seat character") end
         local worker = ContractorMod.workers[ContractorMod.currentID]
         if playerStyle ~= nil then
             worker.currentSeat = seatIndex
         else
-            -- TODO: If we leave the vehicle as passenger, we might also clear currentVehicle
-            print("Leaving passenger seat, clear currentSeat for worker "..worker.name)
+            if ContractorMod.debug then print("Leaving passenger seat, clear currentSeat for worker "..worker.name) end
             worker.currentSeat = nil
         end
         superfunc(self, seatIndex, playerStyle)
     end
-    print(string.format("setPassengerSeatCharacter active camera %s", tostring(self.spec_enterable.activeCamera)))
+    if ContractorMod.debug then print(string.format("setPassengerSeatCharacter active camera %s", tostring(self.spec_enterable.activeCamera))) end
 end
 EnterablePassenger.setPassengerSeatCharacter = Utils.overwrittenFunction(EnterablePassenger.setPassengerSeatCharacter, cmEnterablePassenger.setPassengerSeatCharacter)
 
@@ -112,24 +119,64 @@ function cmEnterablePassenger:getDistanceToNode(superfunc, superFunc, node)
 end
 EnterablePassenger.getDistanceToNode = Utils.overwrittenFunction(EnterablePassenger.getDistanceToNode, cmEnterablePassenger.getDistanceToNode)
 
+-- Resolve a passengerSeat table entry to its seat index in spec.passengerSeats.
+local function cmGetSeatIndexFromSeatEntry(vehicle, passengerSeat)
+    local spec = vehicle.spec_enterablePassenger
+    if spec == nil or spec.passengerSeats == nil then
+        return nil
+    end
+
+    for seatIndex, seat in ipairs(spec.passengerSeats) do
+        if seat == passengerSeat then
+            return seatIndex
+        end
+    end
+
+    return nil
+end
+
+-- Base game seat selection uses getIsPassengerSeatAvailable(passengerSeat), not the index-based variant.
+function cmEnterablePassenger:getIsPassengerSeatAvailable(superfunc, passengerSeat)
+    local seatAvailable = superfunc(self, passengerSeat)
+
+    if not ContractorMod.enablePassenger then
+        return seatAvailable
+    end
+
+    if not ContractorMod:isControlledByWorker(self) then
+        return seatAvailable
+    end
+
+    if not seatAvailable then
+        return false
+    end
+
+    local seatIndex = cmGetSeatIndexFromSeatEntry(self, passengerSeat)
+    if seatIndex == nil then
+        return false
+    end
+
+    for _, worker in pairs(ContractorMod.workers) do
+        local currentVehicle = ContractorMod:getWorkerVehicle(worker)
+        if currentVehicle == self and worker.currentSeat == seatIndex then
+            return false
+        end
+    end
+
+    return true
+end
+EnterablePassenger.getIsPassengerSeatAvailable = Utils.overwrittenFunction(EnterablePassenger.getIsPassengerSeatAvailable, cmEnterablePassenger.getIsPassengerSeatAvailable)
+
 -- Take into account occupied seats by workers to determine if passenger seat is available or not
 function cmEnterablePassenger:getIsPassengerSeatIndexAvailable(superfunc, seatIndex)
-    if ContractorMod.enablePassenger and ContractorMod:isControlledByWorker(self) then
-        -- local firstFreeSeat = ContractorMod:getFirstFreeSeat(self);
-        local seatAvailable = true
-        -- Collect which seat indices are occupied
-        for _, worker in pairs(ContractorMod.workers) do
-            local currentVehicle = ContractorMod:getWorkerVehicle(worker)
-            if currentVehicle == self and worker.currentSeat == seatIndex then
-                seatAvailable = false
-                break
-            end
-        end
-        --print(string.format("cmEnterablePassenger:getIsPassengerSeatAvailable seatIndex=%s seatAvailable=%s", seatIndex, tostring(seatAvailable)))
-        return seatAvailable
-    else
-        return superfunc(self, seatIndex)
+    local spec = self.spec_enterablePassenger
+    local passengerSeat = spec ~= nil and spec.passengerSeats ~= nil and spec.passengerSeats[seatIndex] or nil
+
+    if passengerSeat == nil then
+        return false
     end
+
+    return self:getIsPassengerSeatAvailable(passengerSeat)
 end
 EnterablePassenger.getIsPassengerSeatIndexAvailable = Utils.overwrittenFunction(EnterablePassenger.getIsPassengerSeatIndexAvailable, cmEnterablePassenger.getIsPassengerSeatIndexAvailable)
 
