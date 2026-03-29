@@ -1,9 +1,7 @@
 cmPlayer = {}
 
 function cmPlayer:onLeaveVehicle(superfunc, vehicle, noEventSend)
-    if ContractorMod.debug then 
-        print(string.format("cmPlayer.onLeaveVehicle vehicle=%s", vehicle and (vehicle.getName and vehicle:getName() or tostring(vehicle)) or "nil")) 
-    end
+    if ContractorMod.debug then print(string.format("cmPlayer.onLeaveVehicle vehicle=%s", vehicle and (vehicle.getName and vehicle:getName() or tostring(vehicle)) or "nil")) end
     local currentVehicle = g_localPlayer:getCurrentVehicle()
     if currentVehicle then
         cmPlayer:ManageLeaveVehicle(currentVehicle)
@@ -60,6 +58,9 @@ Player.drawUIInfo = Utils.appendedFunction(Player.drawUIInfo, cmPlayer.drawUIInf
 
 -- Prevent to spawn vehicle on mission start
 function cmPlayer:getHasSpawnVehicle(superfunc)
-	return false
+	if ContractorMod.workers ~= nil then
+        return ContractorMod.workers[1] ~= nil and ContractorMod.workers[1].currentVehicle ~= nil
+    end
+    return false
 end
 Player.getHasSpawnVehicle = Utils.overwrittenFunction(Player.getHasSpawnVehicle, cmPlayer.getHasSpawnVehicle)
