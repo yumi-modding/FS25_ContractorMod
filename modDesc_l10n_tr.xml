@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <texts>
+        <text name="input_ContractorMod_NEXTWORKER" text="Sonraki işçiye geç" />
+        <text name="input_ContractorMod_PREVWORKER" text="Önceki işçiye geç" />
+        <text name="input_ContractorMod_WORKER1" text="İşçi 1'e geç" />
+        <text name="input_ContractorMod_WORKER2" text="İşçi 2'ye geç" />
+        <text name="input_ContractorMod_WORKER3" text="İşçi 3'e geç" />
+        <text name="input_ContractorMod_WORKER4" text="İşçi 4'e geç" />
+        <text name="input_ContractorMod_WORKER5" text="İşçi 5'e geç" />
+        <text name="input_ContractorMod_WORKER6" text="İşçi 6'ya geç" />
+        <text name="input_ContractorMod_WORKER7" text="İşçi 7'ye geç" />
+        <text name="input_ContractorMod_WORKER8" text="İşçi 8'e geç" />
+        <text name="action_ContractorMod_SWITCH" text="Bu işçiye geç" />
+        <text name="action_ContractorMod_DEACTIVATE" text="Bu işçiyi devre dışı bırak" />
+        <text name="action_ContractorMod_ACTIVATE" text="Bu işçiyi etkinleştir" />
+        <text name="ContractorMod_VEHICLE_NOT_FREE" text="Araç zaten başka bir işçi tarafından kontrol ediliyor" />
+        <text name="ContractorMod_WORKER_STOP" text="Araçtan inildiğinde araç duracaktır" />
+        <text name="ContractorMod_NO_MORE_PASSENGER" text="Bu araçta yolcu için daha fazla yer yok" />
+        <text name="ContractorMod_WORKER_INACTIVE" text="Bu işçi şu anda etkin değil" />
+        <text name="ContractorMod_SEAT_SWITCH_DISABLED" text="ContractorMod ile koltuk değiştirme devre dışı bırakıldı" />
+    </texts>
+</l10n>
