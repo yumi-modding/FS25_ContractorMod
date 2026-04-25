@@ -128,7 +128,8 @@ function ContractorModWorker:beforeSwitch(noEventSend)
       if noEventSend == nil or noEventSend == false then
         if ContractorModWorker.debug then print(string.format("ContractorModWorker: sendEvent(leaveVehicle passenger seat %d)", self.currentSeat)) end
         self.currentVehicle:leavePassengerSeat(true, self.currentSeat)
-				g_localPlayer:onLeaveVehicleAsPassenger(self.currentVehicle)
+		g_localPlayer:onLeaveVehicleAsPassenger(self.currentVehicle)
+        self.currentVehicle.spec_enterablePassenger.passengerSeats[self.currentSeat].vehicleCharacter:setCharacterVisibility(true)
       end
     else
       -- source worker is driving in a vehicle
