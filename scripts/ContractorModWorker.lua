@@ -112,7 +112,7 @@ function ContractorModWorker:beforeSwitch(noEventSend)
     spot.isAvailable = true
     -- spot.needsSaving = true
     g_npcManager:addSpot(spot)
-    
+    self.npc.forceUpdate = true
     self.npc:setSpot(spot)
     self:setYawInstant(g_localPlayer:getGraphicalYaw())
   else
