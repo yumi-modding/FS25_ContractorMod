@@ -199,13 +199,14 @@ end
 EnterablePassenger.getIsInUse = Utils.overwrittenFunction(EnterablePassenger.getIsInUse, cmEnterablePassenger.getIsInUse)
 
 
--- Prevent crash in Enterable:postUpdate -> spec.activeCamera:update(dt) but might lead to other bugs like passenger seat blocked by ghost worker, to investigate
+-- Was used to Prevent crash in Enterable:postUpdate -> spec.activeCamera:update(dt). Seems useless now.
 function cmEnterablePassenger:leavePassengerSeat(superfunc, isOwner, seatIndex)
     print(string.format("cmEnterablePassenger:leavePassengerSeat isOwner=%s seatIndex=%s", tostring(isOwner), tostring(seatIndex)))
     superfunc(self, isOwner, seatIndex)
     local specEnterable = self.spec_enterable
     if specEnterable ~= nil and specEnterable.activeCamera == nil then
+        -- Will set the exterior camera by default instead of last one.
         specEnterable:setActiveCameraIndex(1)
     end
 end
-EnterablePassenger.leavePassengerSeat = Utils.overwrittenFunction(EnterablePassenger.leavePassengerSeat, cmEnterablePassenger.leavePassengerSeat)
+-- EnterablePassenger.leavePassengerSeat = Utils.overwrittenFunction(EnterablePassenger.leavePassengerSeat, cmEnterablePassenger.leavePassengerSeat)
