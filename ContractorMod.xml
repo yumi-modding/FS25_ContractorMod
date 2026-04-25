@@ -9,10 +9,9 @@
      - for female character, use /playerF/playerF.xml file
      - Other attributes should better be retrieved from ContractorMod.xml file in savegame directory once configured in wardrobe screen. 
     If you want to modify some element on a savegame, you can edit similar file in corresponding savegame directory
-    enablePassenger can be set to true to enable passenger mode, then you can enter compatible vehicles as passenger.
-    It is currently disable by default since it's in beta version and not fully tested yet.
+    enablePassenger can be set to false to disable passenger mode in case of any blocking bug.
     -->
-    <workers numWorkers="4" enablePassenger="false">
+    <workers numWorkers="4" enablePassenger="true">
         <worker name="Alex">
             <style filename="dataS/character/playerM/playerM.xml">
                 <facegear color="1"/>

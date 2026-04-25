@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="106">
+<modDesc descVersion="107">
   <author>yumi</author>
-  <version>0.1.5.0</version>
+  <version>0.1.6.0</version>
   <title>
     <en>ContractorMod</en>
   </title>
@@ -25,7 +25,6 @@ Characters can be seen on the minimap when activating default category (the last
 
 TO FIX: Name, gender, color, body, hair, accessories and number of characters can be changed in ContractorMod.xml file located in modSettings directory for new games.
 Once a game has been saved, they can be changed in ContractorMod.xml file present in related savegame folder.
-BETA VERSION: Passenger mode can be activated in ContractorMod.xml file by setting enablePassenger to true, then you can enter vehicles as passenger and use the camera.
 TO IMPLEMENT: ContractorMod.xml file also contains configuration for passengers for mods vehicles. You can add your own mods here.
 ]]></en>
     <de><![CDATA[
