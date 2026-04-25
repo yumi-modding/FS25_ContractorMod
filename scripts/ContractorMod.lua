@@ -160,13 +160,13 @@ function ContractorMod:getWorkerFromNPC(npc)
         if worker ~= nil then
             return worker
         else
-            print("Worker not found for id "..tostring(workerId))
+            if ContractorMod.debug then print("Worker not found for id "..tostring(workerId)) end
         end
       else
-        print("Invalid worker id in npc name "..npc.name)
+        if ContractorMod.debug then print("Invalid worker id in npc name "..npc.name) end
       end
     else
-      print("Not a worker npc "..npc.name)
+      if ContractorMod.debug then print("Not a worker npc "..npc.name) end
     end
   end
 end
@@ -489,15 +489,17 @@ function ContractorMod:getFirstFreeSeat(vehicle)
       occupiedSeats[worker.currentSeat] = true
     end
   end
-  
+  -- print("Vehicle "..(vehicle.getName and vehicle:getName() or tostring(vehicle)))
   -- Find first available seat
   for seatIndex = 1, totalSeats do
     if not occupiedSeats[seatIndex] then
       -- print("First free seat index: " .. seatIndex)
+      -- printCallstack()
       return seatIndex
     end
   end
   -- print("No free seats available")
+  -- printCallstack()
   -- No seats available
   return 0
 end
