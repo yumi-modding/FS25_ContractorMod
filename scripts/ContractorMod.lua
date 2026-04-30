@@ -214,9 +214,9 @@ function ContractorMod:initFromSave()
             if vehicle ~= nil then
               if ContractorMod.debug then print("ContractorMod: vehicle not nil") end
               worker.currentVehicle = vehicle
-              local currentSeat = xml:getInt(key.."#currentSeat")
+              local currentSeat = xml:getString(key.."#currentSeat")
               if currentSeat ~= nil then
-                worker.currentSeat = currentSeat
+                worker.currentSeat = tonumber(currentSeat)
               end
             end
           end
@@ -262,7 +262,6 @@ function ContractorMod:initFromParameters()
     else
       return false
     end
-    print("file exists")
     local num = xml:getInt("ContractorMod.workers#numWorkers") or 0
     for i = 1, num do
       local key = string.format("ContractorMod.workers.worker(%d)", i-1)
